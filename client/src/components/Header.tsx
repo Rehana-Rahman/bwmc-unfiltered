@@ -102,7 +102,15 @@ export default function Header() {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
-                      <a href="/api/logout" className="cursor-pointer">
+                      <a 
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to log out?')) {
+                            const isReplit = !!document.querySelector('meta[name="replit-auth"]');
+                            window.location.href = isReplit ? "/api/logout" : "/api/auth/logout";
+                          }
+                        }} 
+                        className="cursor-pointer"
+                      >
                         Log out
                       </a>
                     </DropdownMenuItem>
@@ -110,7 +118,7 @@ export default function Header() {
                 </DropdownMenu>
               </>
             ) : (
-              <Button onClick={() => (window.location.href = "/api/login")} className="bg-primary">
+              <Button onClick={() => setLocation("/auth")} className="bg-primary">
                 Log In
               </Button>
             )}
@@ -247,7 +255,17 @@ export default function Header() {
                             className="w-full"
                             asChild
                           >
-                            <a href="/api/logout">Log out</a>
+                            <a 
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to log out?')) {
+                                  const isReplit = !!document.querySelector('meta[name="replit-auth"]');
+                                  window.location.href = isReplit ? "/api/logout" : "/api/auth/logout";
+                                }
+                              }} 
+                              className="cursor-pointer"
+                            >
+                              Log out
+                            </a>
                           </Button>
                         </div>
                       </div>
@@ -255,7 +273,7 @@ export default function Header() {
                   </Sheet>
                 ) : (
                   <Button
-                    onClick={() => (window.location.href = "/api/login")}
+                    onClick={() => setLocation("/auth")}
                     size="sm"
                     className="bg-primary"
                   >

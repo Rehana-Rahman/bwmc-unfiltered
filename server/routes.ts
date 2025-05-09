@@ -161,6 +161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hot posts route (comes before /:id route to avoid conflict)
   app.get("/api/posts/hot", async (req, res) => {
     try {
       // Return trending posts for now as "hot" posts
