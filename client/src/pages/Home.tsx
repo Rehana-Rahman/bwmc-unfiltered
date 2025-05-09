@@ -35,7 +35,14 @@ export default function Home({ redirectToLogin = false }: HomeProps) {
 
   // Fetch posts based on active tab
   const { data: posts, isLoading } = useQuery<Post[]>({
-    queryKey: [isAuthenticated ? `/api/posts/feed` : `/api/posts/${activeTab}`, activeTab],
+    queryKey: [
+      isAuthenticated 
+        ? `/api/posts/feed` 
+        : (activeTab === 'hot' || activeTab === 'trending' 
+            ? `/api/posts/${activeTab}` 
+            : `/api/posts/hot`),
+      activeTab
+    ],
     enabled: !redirectToLogin,
   });
 

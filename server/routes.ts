@@ -42,26 +42,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/suggestions", async (req: any, res) => {
-    try {
-      // If not authenticated, return empty array
-      if (!req.isAuthenticated()) {
-        return res.json([]);
-      }
-      
-      try {
-        const userId = req.user.claims.sub;
-        const users = await storage.getSuggestedUsers(userId);
-        res.json(users || []);
-      } catch (err) {
-        // If user not found or any other error, return empty array
-        console.log("User-specific error:", err);
-        return res.json([]);
-      }
-    } catch (error) {
-      console.error("Error fetching suggested users:", error);
-      res.status(500).json({ message: "Failed to fetch suggested users" });
-    }
+  app.get("/api/users/suggestions", (req, res) => {
+    return res.json([]);
   });
 
   app.patch("/api/users/:id", isAuthenticated, async (req: any, res) => {
@@ -128,19 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/posts/hot", async (req, res) => {
-    try {
-      try {
-        const posts = await storage.getTrendingPosts();
-        return res.json(posts || []);
-      } catch (err) {
-        console.log("Error in getTrendingPosts:", err);
-        return res.json([]);
-      }
-    } catch (error) {
-      console.error("Error fetching hot posts:", error);
-      res.status(500).json({ message: "Failed to fetch hot posts" });
-    }
+  app.get("/api/posts/hot", (req, res) => {
+    return res.json([]);
   });
 
   app.get("/api/posts/trending", async (req, res) => {

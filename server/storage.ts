@@ -239,14 +239,20 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getSuggestedUsers(userId: string, limit: number = 3): Promise<User[]> {
-    // Simpler approach: just get a few random users who aren't the current user
-    return await db
-      .select()
-      .from(users)
-      .where(
-        sql`${users.id} != ${userId}`
-      )
-      .limit(limit);
+    try {
+      // Simpler approach: just get a few random users who aren't the current user
+      const result = await db
+        .select()
+        .from(users)
+        .where(
+          sql`${users.id} != ${userId}`
+        )
+        .limit(limit);
+      return result || [];
+    } catch (error) {
+      console.error("Error in getSuggestedUsers:", error);
+      return [];
+    }
   }
   
   // Message operations
