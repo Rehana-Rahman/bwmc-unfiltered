@@ -29,6 +29,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   username: varchar("username").unique(),
   email: varchar("email").unique(),
+  password: varchar("password"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   bio: text("bio"),
@@ -134,6 +135,21 @@ export const games = pgTable("games", {
 export const upsertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
+});
+
+// Schema for traditional authentication
+export const registerUserSchema = z.object({
+  username: z.string().min(3).max(30),
+  email: z.string().email(),
+  password: z.string().min(8),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  profileImageUrl: z.string().optional(),
+});
+
+export const loginUserSchema = z.object({
+  username: z.string(),
+  password: z.string(),
 });
 
 // Schema for creating posts
