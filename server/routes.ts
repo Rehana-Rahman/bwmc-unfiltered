@@ -1,10 +1,31 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated as replitIsAuthenticated } from "./replitAuth";
+import { setupTraditionalAuth, isAuthenticated as tradIsAuthenticated } from "./auth";
 import { setupWebSocket } from "./websocket";
 import { insertPostSchema, insertFollowSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
+
+// Combined middleware that checks both authentication methods
+const isAuthenticated = (req: any, res: any, next: any) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  return replitIsAuthenticated(req, res, next);
+};
+
+// Helper function to get user ID regardless of auth method
+const getUserId = (req: any): string | undefined => {
+  if (req.user) {
+    if (req.user.id) {
+      return req.user.id;
+    } else if (req.user.claims && req.user.claims.sub) {
+      return req.user.claims.sub;
+    }
+  }
+  return undefined;
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Create HTTP server
@@ -15,13 +36,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Auth middleware
   await setupAuth(app);
+  setupTraditionalAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      // Get user ID using our helper function
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const user = await storage.getUser(userId);
-      res.json(user);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove password before returning user data
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -48,7 +82,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/users/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      // Get user ID using our helper function
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       
       // Users can only update their own profile
       if (userId !== req.params.id) {
@@ -56,7 +95,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updatedUser = await storage.updateUser(userId, req.body);
-      res.json(updatedUser);
+      
+      // Remove password before returning
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ message: "Failed to update user" });

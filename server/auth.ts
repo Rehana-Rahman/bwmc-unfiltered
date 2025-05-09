@@ -10,7 +10,8 @@ export async function hashPassword(password: string): Promise<string> {
   return await bcrypt.hash(password, salt);
 }
 
-export async function comparePasswords(password: string, hash: string): Promise<boolean> {
+export async function comparePasswords(password: string, hash: string | null): Promise<boolean> {
+  if (!hash) return false;
   return await bcrypt.compare(password, hash);
 }
 
@@ -74,6 +75,11 @@ export function setupTraditionalAuth(app: any) {
       }
       
       // Verify password
+      // Check if password exists
+      if (!user.password) {
+        return res.status(401).json({ message: "Invalid username or password" });
+      }
+      
       const passwordValid = await comparePasswords(loginData.password, user.password);
       if (!passwordValid) {
         return res.status(401).json({ message: "Invalid username or password" });
