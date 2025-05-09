@@ -42,11 +42,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/suggestions", isAuthenticated, async (req: any, res) => {
+  app.get("/api/users/suggestions", async (req: any, res) => {
     try {
+      // If not authenticated, return empty array
+      if (!req.isAuthenticated()) {
+        return res.json([]);
+      }
+      
       const userId = req.user.claims.sub;
       const users = await storage.getSuggestedUsers(userId);
-      res.json(users);
+      res.json(users || []);
     } catch (error) {
       console.error("Error fetching suggested users:", error);
       res.status(500).json({ message: "Failed to fetch suggested users" });
@@ -120,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/posts/hot", async (req, res) => {
     try {
       const posts = await storage.getTrendingPosts();
-      res.json(posts);
+      res.json(posts || []);
     } catch (error) {
       console.error("Error fetching hot posts:", error);
       res.status(500).json({ message: "Failed to fetch hot posts" });
@@ -130,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/posts/trending", async (req, res) => {
     try {
       const posts = await storage.getTrendingPosts();
-      res.json(posts);
+      res.json(posts || []);
     } catch (error) {
       console.error("Error fetching trending posts:", error);
       res.status(500).json({ message: "Failed to fetch trending posts" });
@@ -291,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/topics/trending", async (req, res) => {
     try {
       const topics = await storage.getTrendingTopics();
-      res.json(topics);
+      res.json(topics || []);
     } catch (error) {
       console.error("Error fetching trending topics:", error);
       res.status(500).json({ message: "Failed to fetch trending topics" });
@@ -302,7 +307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/games", async (req, res) => {
     try {
       const games = await storage.getActiveGames();
-      res.json(games);
+      res.json(games || []);
     } catch (error) {
       console.error("Error fetching games:", error);
       res.status(500).json({ message: "Failed to fetch games" });
