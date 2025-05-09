@@ -108,7 +108,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Post routes
   app.post("/api/posts", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       
       // Validate post data
       const postData = insertPostSchema.parse({
@@ -142,7 +146,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/posts/feed", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       const posts = await storage.getFeedPosts(userId, limit);
       res.json(posts);
@@ -152,8 +161,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/posts/hot", (req, res) => {
-    return res.json([]);
+  app.get("/api/posts/hot", async (req, res) => {
+    try {
+      // Return trending posts for now as "hot" posts
+      const posts = await storage.getTrendingPosts();
+      res.json(posts || []);
+    } catch (error) {
+      console.error("Error fetching hot posts:", error);
+      // Return empty array instead of error
+      res.json([]);
+    }
   });
 
   app.get("/api/posts/trending", async (req, res) => {
@@ -178,6 +195,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/posts/:id/upvote", isAuthenticated, async (req, res) => {
     try {
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const postId = Number(req.params.id);
       const post = await storage.upvotePost(postId);
       res.json(post);
@@ -190,7 +213,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Follow routes
   app.post("/api/follows", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       
       // Users can only create follows for themselves
       if (userId !== req.body.followerId) {
@@ -213,7 +240,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/follows/:followerId/:followingId", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       
       // Users can only delete their own follows
       if (userId !== req.params.followerId) {
@@ -230,14 +261,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/follows/status", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const followingId = req.query.followingId;
       
       if (!followingId) {
         return res.status(400).json({ message: "Missing followingId parameter" });
       }
       
-      const isFollowing = await storage.isFollowing(userId, followingId);
+      const isFollowing = await storage.isFollowing(userId, followingId as string);
       res.json(isFollowing);
     } catch (error) {
       console.error("Error checking follow status:", error);
@@ -268,7 +304,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Message routes
   app.post("/api/messages", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
       
       // Users can only send messages as themselves
       if (userId !== req.body.senderId) {
@@ -291,7 +331,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/messages/conversations", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const conversations = await storage.getConversations(userId);
       res.json(conversations);
     } catch (error) {
@@ -302,7 +347,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/messages/:userId", isAuthenticated, async (req: any, res) => {
     try {
-      const currentUserId = req.user.claims.sub;
+      const currentUserId = getUserId(req);
+      
+      if (!currentUserId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const otherUserId = req.params.userId;
       
       const messages = await storage.getMessages(currentUserId, otherUserId);

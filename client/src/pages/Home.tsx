@@ -29,7 +29,7 @@ export default function Home({ redirectToLogin = false }: HomeProps) {
         description: "Please log in to access this feature",
         variant: "destructive",
       });
-      setLocation("/api/login");
+      setLocation("/auth");
     }
   }, [redirectToLogin, isAuthenticated, setLocation, toast]);
 
@@ -73,7 +73,7 @@ export default function Home({ redirectToLogin = false }: HomeProps) {
                 <p className="text-muted-foreground">
                   Connect with your campus community. Share posts, follow friends, and join discussions.
                 </p>
-                <Button onClick={() => setLocation("/api/login")} className="bg-primary hover:bg-primary/90">
+                <Button onClick={() => setLocation("/auth")} className="bg-primary hover:bg-primary/90">
                   Log In / Sign Up
                 </Button>
               </div>
