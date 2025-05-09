@@ -157,11 +157,17 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getTrendingPosts(limit: number = 10): Promise<Post[]> {
-    return await db
-      .select()
-      .from(posts)
-      .orderBy(desc(posts.upvotes), desc(posts.comments), desc(posts.createdAt))
-      .limit(limit);
+    try {
+      const result = await db
+        .select()
+        .from(posts)
+        .orderBy(desc(posts.upvotes), desc(posts.comments), desc(posts.createdAt))
+        .limit(limit);
+      return result || [];
+    } catch (error) {
+      console.error("Error in getTrendingPosts:", error);
+      return [];
+    }
   }
   
   async upvotePost(id: number): Promise<Post> {
@@ -337,20 +343,32 @@ export class DatabaseStorage implements IStorage {
   
   // Topic operations
   async getTrendingTopics(limit: number = 5): Promise<Topic[]> {
-    return await db
-      .select()
-      .from(topics)
-      .where(eq(topics.trending, true))
-      .orderBy(desc(topics.postCount))
-      .limit(limit);
+    try {
+      const result = await db
+        .select()
+        .from(topics)
+        .where(eq(topics.trending, true))
+        .orderBy(desc(topics.postCount))
+        .limit(limit);
+      return result || [];
+    } catch (error) {
+      console.error("Error in getTrendingTopics:", error);
+      return [];
+    }
   }
   
   // Game operations
   async getActiveGames(): Promise<Game[]> {
-    return await db
-      .select()
-      .from(games)
-      .where(eq(games.active, true));
+    try {
+      const result = await db
+        .select()
+        .from(games)
+        .where(eq(games.active, true));
+      return result || [];
+    } catch (error) {
+      console.error("Error in getActiveGames:", error);
+      return [];
+    }
   }
 }
 

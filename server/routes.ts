@@ -49,9 +49,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const userId = req.user.claims.sub;
-      const users = await storage.getSuggestedUsers(userId);
-      res.json(users || []);
+      try {
+        const userId = req.user.claims.sub;
+        const users = await storage.getSuggestedUsers(userId);
+        res.json(users || []);
+      } catch (err) {
+        // If user not found or any other error, return empty array
+        console.log("User-specific error:", err);
+        return res.json([]);
+      }
     } catch (error) {
       console.error("Error fetching suggested users:", error);
       res.status(500).json({ message: "Failed to fetch suggested users" });
@@ -124,8 +130,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/posts/hot", async (req, res) => {
     try {
-      const posts = await storage.getTrendingPosts();
-      res.json(posts || []);
+      try {
+        const posts = await storage.getTrendingPosts();
+        return res.json(posts || []);
+      } catch (err) {
+        console.log("Error in getTrendingPosts:", err);
+        return res.json([]);
+      }
     } catch (error) {
       console.error("Error fetching hot posts:", error);
       res.status(500).json({ message: "Failed to fetch hot posts" });
@@ -312,6 +323,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching games:", error);
       res.status(500).json({ message: "Failed to fetch games" });
     }
+  });
+
+  // Add a catch-all route for API endpoints that aren't found
+  app.use('/api/*', (req, res) => {
+    // For GET requests, return empty arrays or objects
+    if (req.method === 'GET') {
+      if (req.path.includes('users') || 
+          req.path.includes('posts') || 
+          req.path.includes('topics') ||
+          req.path.includes('games')) {
+        return res.json([]);
+      }
+      return res.json({});
+    }
+    // For other methods, return appropriate error
+    res.status(404).json({ message: "Endpoint not found" });
   });
 
   return httpServer;
