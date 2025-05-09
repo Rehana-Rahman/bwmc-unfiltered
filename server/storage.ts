@@ -17,7 +17,7 @@ import {
   type Game,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, or, like, sql, isNull, asc } from "drizzle-orm";
+import { eq, ne, and, desc, or, like, sql, isNull, asc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -120,6 +120,9 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getPost(id: number): Promise<Post | undefined> {
+    if (isNaN(id)) {
+      return undefined;
+    }
     const [post] = await db
       .select()
       .from(posts)
@@ -230,16 +233,12 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getSuggestedUsers(userId: string, limit: number = 3): Promise<User[]> {
-    // Get users the current user is not following
-    const following = await this.getFollowing(userId);
-    const followingIds = following.map(user => user.id);
-    followingIds.push(userId); // Exclude self
-    
+    // Simpler approach: just get a few random users who aren't the current user
     return await db
       .select()
       .from(users)
       .where(
-        sql`${users.id} NOT IN (${followingIds.join(',')})`,
+        sql`${users.id} != ${userId}`
       )
       .limit(limit);
   }
@@ -297,9 +296,11 @@ export class DatabaseStorage implements IStorage {
     }
     
     return Array.from(conversationMap.values())
-      .sort((a, b) => 
-        new Date(b.lastMessage.createdAt).getTime() - new Date(a.lastMessage.createdAt).getTime()
-      );
+      .sort((a, b) => {
+        const dateA = a.lastMessage.createdAt ? new Date(a.lastMessage.createdAt).getTime() : 0;
+        const dateB = b.lastMessage.createdAt ? new Date(b.lastMessage.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
   }
   
   async getMessages(userId: string, otherUserId: string): Promise<Message[]> {
