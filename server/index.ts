@@ -85,3 +85,39 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
   });
 })();
+
+import dotenv from 'dotenv';
+import path from 'path';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from 'ws';
+import * as schema from '@shared/schema';
+
+// Load environment variables from .env file
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
+
+// Configure Neon to use WebSocket (required for serverless)
+neonConfig.webSocketConstructor = ws;
+
+// Check if DATABASE_URL is set
+if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
+}
+
+// Create a connection pool to the PostgreSQL database
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+// Initialize Drizzle ORM with the pool and schema
+export const db = drizzle({ client: pool, schema });
+
+// Optional: Test the connection
+async function testConnection() {
+    try {
+        await pool.connect();
+        console.log('Successfully connected to the database!');
+    } catch (error) {
+        console.error('Failed to connect to the database:', error);
+    }
+}
+
+testConnection();
