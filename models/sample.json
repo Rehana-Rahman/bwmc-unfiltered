@@ -1,0 +1,7 @@
+{
+  "name": "Forum Meetup",
+  "description": "A community meetup for forum users",
+  "date": { "$date": "2025-06-01T10:00:00Z" },
+  "creator_id": "user123",
+  "createdAt": { "$date": "2025-05-25T17:34:00Z" }
+}

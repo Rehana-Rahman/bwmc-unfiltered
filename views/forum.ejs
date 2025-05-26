@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BWMC Unfiltered</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/output.css">
+  <link rel="stylesheet" href="/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="text-gray-800 min-h-screen">
+  <!-- Navigation Bar -->
+  <nav class="bg-blue-600 text-white p-4 sticky top-0 z-10">
+    <div class="container mx-auto max-w-4xl flex flex-col sm:flex-row justify-between items-center">
+      <h1 class="text-2xl font-bold mb-2 sm:mb-0">BWMC Unfiltered</h1>
+      <div class="flex flex-wrap justify-center sm:space-x-4">
+        <a href="#home" class="hover:underline px-2 py-1" id="home-link">Home</a>
+        <a href="#profile" class="hover:underline px-2 py-1" id="profile-link">Profile</a>
+        <a href="#groups" class="hover:underline px-2 py-1" id="groups-link">Groups</a>
+        <a href="#events" class="hover:underline px-2 py-1" id="events-link">Events</a>
+        <a href="#games" class="hover:underline px-2 py-1" id="games-link">Games</a>
+        <a href="#business" class="hover:underline px-2 py-1" id="business-link">Promote Business</a>
+        <a href="#settings" class="hover:underline px-2 py-1" id="settings-link">Settings</a>
+        <a href="/dm" id="dm-link">
+          <i class="fas fa-envelope"></i>
+        </a>
+        <a href="#" class="hover:underline px-2 py-1" id="logout-link">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mx-auto max-w-4xl p-6">
+    <!-- Post Modal -->
+    <div id="post-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+      <div class="bg-white p-6 rounded-lg w-full max-w-md">
+        <h2 class="text-2xl font-semibold text-blue-600 mb-4">Create a Post</h2>
+        <textarea id="post-content" class="w-full p-2 border rounded" placeholder="What's on your mind?"></textarea>
+        <input id="post-link" type="url" class="w-full p-2 border rounded mt-2" placeholder="Add a link (optional)">
+        <div class="flex justify-end mt-4 space-x-2">
+          <button id="close-post-modal" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+          <button id="submit-post" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post-Comment Section -->
+    <section id="post-comment" class="mb-8 bg-white/95 p-6 rounded-lg">
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <h2 class="text-2xl font-semibold text-blue-600 mb-4">Create a Post</h2>
+        <button id="plus-button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ New Post</button>
+      </div>
+    </section>
+
+    <!-- Home Section -->
+    <section id="home" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+        <h2 class="text-2xl font-semibold text-blue-600">Forum Posts</h2>
+        <select id="sort-posts" class="p-2 border rounded mt-2 sm:mt-0">
+          <option value="newest">Sort by Newest</option>
+          <option value="most-liked">Sort by Most Liked</option>
+        </select>
+      </div>
+      <div id="posts" class="space-y-4"></div>
+    </section>
+
+    <!-- Profile Section -->
+    <section id="profile" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Your Profile</h2>
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <p><strong>Username:</strong> <span id="username-display"></span></p>
+        <p><strong>Bio:</strong> <span id="bio-display"></span></p>
+        <p><strong>Friends:</strong> <span id="friends-list"></span></p>
+        <input id="friend-username" class="w-full p-2 border rounded mb-2" placeholder="Friend's username">
+        <button id="add-friend" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Add Friend</button>
+      </div>
+    </section>
+
+    <!-- Groups Section -->
+    <section id="groups" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Groups</h2>
+      <div class="bg-blue-50 p-4 rounded-lg mb-4">
+        <input id="group-name" class="w-full p-2 border rounded" placeholder="Create a new group">
+        <button id="create-group" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Create Group</button>
+      </div>
+      <div id="groups-list" class="space-y-4"></div>
+    </section>
+
+    <!-- Chat Section -->
+    <section id="chat" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Chat</h2>
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <input id="chat-receiver" class="w-full p-2 border rounded mb-2" placeholder="Receiver's username">
+        <div id="chat-messages" class="h-64 overflow-y-auto border p-2 mb-2"></div>
+        <input id="chat-input" class="w-full p-2 border rounded" placeholder="Type a message...">
+        <button id="chat-send" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Send</button>
+      </div>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">College Events</h2>
+      <div class="bg-blue-50 p-4 rounded-lg mb-4">
+        <input id="event-name" class="w-full p-2 border rounded mb-2" placeholder="Event Name">
+        <input id="event-date" type="date" class="w-full p-2 border rounded mb-2">
+        <textarea id="event-desc" class="w-full p-2 border rounded" placeholder="Event Description"></textarea>
+        <button id="create-event" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Create Event</button>
+      </div>
+      <div id="events-list" class="space-y-4"></div>
+    </section>
+
+    <!-- Games Section -->
+    <section id="games" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Mini Games</h2>
+      <!-- Tic-Tac-Toe -->
+      <div class="bg-blue-50 p-4 rounded-lg mb-8">
+        <h3 class="text-lg font-semibold mb-2">Tic-Tac-Toe</h3>
+        <div id="tic-tac-toe-status" class="text-center mb-4 text-lg font-semibold text-blue-600"></div>
+        <div id="tic-tac-toe" class="grid grid-cols-3 gap-2 w-64 mx-auto"></div>
+        <div class="flex justify-center mt-4">
+          <button id="reset-tic-tac-toe" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Reset Game</button>
+        </div>
+      </div>
+      <!-- Snake Game -->
+      <div class="bg-blue-50 p-4 rounded-lg mb-8">
+        <h3 class="text-lg font-semibold mb-2">Snake Game</h3>
+        <div class="flex justify-between items-center mb-4">
+          <div id="snake-score" class="text-lg font-semibold text-blue-600">Score: 0</div>
+          <div id="snake-status" class="text-lg font-semibold text-blue-600"></div>
+        </div>
+        <canvas id="snake-canvas" class="border-2 border-blue-600 mx-auto" width="400" height="400"></canvas>
+        <div class="flex space-x-4 mt-4 justify-center">
+          <button id="start-snake" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Start Game</button>
+          <button id="restart-snake" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 hidden">Restart Game</button>
+        </div>
+      </div>
+      <!-- Memory Match Game -->
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <h3 class="text-lg font-semibold mb-2">Memory Match</h3>
+        <div class="flex justify-between items-center mb-4">
+          <div id="memory-moves" class="text-lg font-semibold text-blue-600">Moves: 0</div>
+          <div id="memory-status" class="text-lg font-semibold text-blue-600"></div>
+        </div>
+        <div id="memory-game" class="grid grid-cols-2 sm:grid-cols-4 gap-2 w-64 mx-auto"></div>
+        <div class="flex justify-center mt-4">
+          <button id="reset-memory" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Reset Game</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Business Promotion Section -->
+    <section id="business" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Promote Your Business</h2>
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <input id="business-name" class="w-full p-2 border rounded mb-2" placeholder="Business Name">
+        <textarea id="business-desc" class="w-full p-2 border rounded mb-2" placeholder="Description"></textarea>
+        <input id="business-link" type="url" class="w-full p-2 border rounded mb-2" placeholder="Business Link">
+        <button id="promote-business" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Promote</button>
+      </div>
+      <div id="business-list" class="space-y-4"></div>
+    </section>
+
+    <!-- Settings Section -->
+    <section id="settings" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Settings</h2>
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <input id="profile-pic" type="file" class="w-full p-2 border rounded mb-2" accept="image/*">
+        <input id="profile-name" class="w-full p-2 border rounded mb-2" placeholder="Profile Name">
+        <button id="save-settings" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Save Settings</button>
+      </div>
+    </section>
+
+    <!-- DM Section -->
+    <section id="dm" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
+      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Direct Messages</h2>
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <input id="dm-username" class="w-full p-2 border rounded mb-2" placeholder="Recipient's username">
+        <textarea id="dm-message" class="w-full p-2 border rounded mb-2" placeholder="Your message"></textarea>
+        <button id="send-dm" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Send</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="/script.js"></script>
+</body>
+</html>
