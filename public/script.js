@@ -3,28 +3,41 @@
 const isBrowser = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 
 // Initialize token and user only in browser
-const token = isBrowser ? localStorage.getItem('token') : null;
-const user = token && isBrowser ? JSON.parse(atob(token.split('.')[1])) : null;
+let token = null;
+let user = null;
+if (isBrowser) {
+  token = localStorage.getItem('token');
+  try {
+    user = token ? JSON.parse(atob(token.split('.')[1])) : null;
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    localStorage.removeItem('token');
+    token = null;
+    user = null;
+  }
+}
 
 // Show/hide sections
 function showSection(sectionId) {
   if (!isBrowser) return;
   document.querySelectorAll('section').forEach(section => section.classList.add('hidden'));
-  document.getElementById(sectionId).classList.remove('hidden');
-
-  // Initialize games only when Games section is shown
-  if (sectionId === 'games') {
-    initializeTicTacToe();
-    initializeSnake();
-    initializeMemoryMatch();
+  const section = document.getElementById(sectionId);
+  if (section) {
+    section.classList.remove('hidden');
+    // Initialize games only when Games section is shown
+    if (sectionId === 'games') {
+      initializeTicTacToe();
+      initializeSnake();
+      initializeMemoryMatch();
+    }
+  } else {
+    console.error(`Section #${sectionId} not found`);
   }
 }
 
 // Navigation
 if (isBrowser) {
-  const navLinks = [
-    'home', 'profile', 'groups', 'events', 'games', 'business', 'settings', 'dm'
-  ];
+  const navLinks = ['home', 'profile', 'groups', 'events', 'games', 'business', 'settings', 'dm'];
   navLinks.forEach(id => {
     const link = document.getElementById(`${id}-link`);
     if (link) {
@@ -64,22 +77,27 @@ if (isBrowser) {
 
   if (plusButton) {
     plusButton.addEventListener('click', () => {
-      document.getElementById('post-modal').classList.remove('hidden');
+      const postModal = document.getElementById('post-modal');
+      if (postModal) postModal.classList.remove('hidden');
     });
   }
   if (closePostModal) {
     closePostModal.addEventListener('click', () => {
-      document.getElementById('post-modal').classList.add('hidden');
+      const postModal = document.getElementById('post-modal');
+      if (postModal) postModal.classList.add('hidden');
     });
   }
   if (submitPost) {
     submitPost.addEventListener('click', async () => {
-      const content = document.getElementById('post-content').value;
-      const link = document.getElementById('post-link').value;
+      const content = document.getElementById('post-content')?.value || '';
+      const link = document.getElementById('post-link')?.value || '';
       try {
         const response = await fetch('/api/posts', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
           body: JSON.stringify({ content, link, userId: user?.id })
         });
         if (!response.ok) {
@@ -100,11 +118,15 @@ if (isBrowser) {
 // Post and Comment
 async function fetchPosts() {
   if (!isBrowser) return;
+  const postsDiv = document.getElementById('posts');
+  if (!postsDiv) {
+    console.error('Posts container not found');
+    return;
+  }
   try {
     const response = await fetch('/api/posts');
     if (!response.ok) throw new Error('Failed to fetch posts');
     const posts = await response.json();
-    const postsDiv = document.getElementById('posts');
     postsDiv.innerHTML = '';
     for (const post of posts) {
       const comments = await fetchComments(post.id);
@@ -116,9 +138,7 @@ async function fetchPosts() {
           <div class="mt-2">
             <h4 class="text-sm font-semibold">Comments</h4>
             <div id="comments-${post.id}" class="ml-4">
-              ${comments.map(c => `
-                <p class="text-sm"><strong>${c.username}</strong>: ${c.content}</p>
-              `).join('')}
+              ${comments.map(c => `<p class="text-sm"><strong>${c.username}</strong>: ${c.content}</p>`).join('')}
             </div>
             <input id="comment-${post.id}" class="w-full p-2 border rounded mt-2" placeholder="Add a comment...">
             <button onclick="submitComment(${post.id})" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Comment</button>
@@ -134,7 +154,7 @@ async function fetchPosts() {
     }
   } catch (error) {
     console.error('Error fetching posts:', error);
-    document.getElementById('posts').innerHTML = '<p class="text-red-600">Failed to load posts. Please try again later.</p>';
+    postsDiv.innerHTML = '<p class="text-red-600">Failed to load posts. Please try again later.</p>';
   }
 }
 
@@ -145,7 +165,11 @@ function addPostInteractions(postId) {
   if (likeBtn) {
     likeBtn.addEventListener('click', async () => {
       try {
-        await fetch(`/api/posts/${postId}/like`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+        const response = await fetch(`/api/posts/${postId}/like`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to like post');
         alert('Post liked!');
       } catch (error) {
         console.error('Error liking post:', error);
@@ -161,7 +185,11 @@ function addPostInteractions(postId) {
   if (followBtn) {
     followBtn.addEventListener('click', async () => {
       try {
-        await fetch(`/api/users/${postId}/follow`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+        const response = await fetch(`/api/users/${postId}/follow`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to follow user');
         alert('User followed!');
       } catch (error) {
         console.error('Error following user:', error);
@@ -181,58 +209,22 @@ async function fetchComments(postId) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const postForm = document.getElementById('postForm');
-  const postsDiv = document.getElementById('posts');
-
-  // Fetch and display posts
-  async function fetchPosts() {
-    const res = await fetch('/api/posts');
-    const posts = await res.json();
-    postsDiv.innerHTML = posts.map(post => `
-      <div class="post">
-        <p>${post.content}</p>
-        ${post.link ? `<a href="${post.link}" target="_blank">${post.link}</a>` : ''}
-        <div>
-          <button onclick="likePost('${post._id}')">Like (${post.likes})</button>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // Handle new post submission
-  if (postForm) {
-    postForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const content = document.getElementById('content').value;
-      const link = document.getElementById('link').value;
-      await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, link })
-      });
-      postForm.reset();
-      fetchPosts();
-    });
-  }
-
-  // Like a post
-  window.likePost = async (id) => {
-    await fetch(`/api/posts/${id}/like`, { method: 'POST' });
-    fetchPosts();
-  };
-
-  fetchPosts();
-});
 async function submitComment(postId) {
   if (!isBrowser) return;
-  const content = document.getElementById(`comment-${postId}`).value;
+  const input = document.getElementById(`comment-${postId}`);
+  if (!input) return;
+  const content = input.value;
+  if (!content) return;
   try {
     await fetch('/api/comments', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
       body: JSON.stringify({ postId, userId: user?.id, content })
     });
+    input.value = '';
     fetchPosts();
   } catch (error) {
     console.error('Error submitting comment:', error);
@@ -240,64 +232,77 @@ async function submitComment(postId) {
 }
 
 // Profile
-document.addEventListener('DOMContentLoaded', () => {
-  // Handle Add Friend button click
-  document.getElementById('add-friend').addEventListener('click', async () => {
-    const friendUsername = document.getElementById('friend-username').value.trim();
-    if (!friendUsername) {
-      alert('Please enter a username');
-      return;
-    }
-    try {
-      const response = await fetch('/api/friends', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ friendUsername }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to add friend');
-      alert(data.message);
-      document.getElementById('friend-username').value = ''; // Clear input
-      // Optionally refresh friends list
-      fetchProfile(); // Assuming a function to refresh profile data
-    } catch (error) {
-      console.error('Error adding friend:', error.message);
-      alert('Error: ' + error.message);
-    }
-  });
-
-  // Function to fetch and display profile data (including friends)
-  async function fetchProfile() {
-    try {
-      const response = await fetch('/api/profile'); // Hypothetical endpoint
-      if (!response.ok) throw new Error('Failed to load profile');
-      const profile = await response.json();
-      document.getElementById('username-display').textContent = profile.username;
-      document.getElementById('bio-display').textContent = profile.bio || 'No bio';
-      document.getElementById('friends-list').textContent = profile.friends.join(', ') || 'No friends';
-    } catch (error) {
-      console.error('Error fetching profile:', error.message);
-    }
+async function loadProfile() {
+  if (!isBrowser) return;
+  const username = user?.username || 'rehana_rahman'; // Fallback username
+  try {
+    const res = await fetch(`/api/profile/${username}`);
+    if (!res.ok) throw new Error('Failed to load profile');
+    const profile = await res.json();
+    document.getElementById('username-display').textContent = profile.username || 'Unknown';
+    document.getElementById('bio-display').textContent = profile.bio || 'No bio';
+    document.getElementById('friends-list').textContent = profile.friends?.join(', ') || 'No friends';
+    document.getElementById('profile').classList.remove('hidden');
+  } catch (error) {
+    console.error('Error loading profile:', error);
+    alert('Failed to load profile');
   }
+}
 
-  // Function to fetch events (to ensure events load correctly)
-  async function fetchEvents() {
-    try {
-      const response = await fetch('/api/events');
-      if (!response.ok) throw new Error('Failed to load events');
-      const events = await response.json();
-      // Update UI with events (implement as needed)
-      console.log('Events:', events);
-    } catch (error) {
-      console.error('Error fetching events:', error.message);
-      alert('Cannot load events');
-    }
+if (isBrowser) {
+  const addFriendBtn = document.getElementById('add-friend');
+  if (addFriendBtn) {
+    addFriendBtn.addEventListener('click', async () => {
+      const friendUsername = document.getElementById('friend-username')?.value;
+      if (!friendUsername) return;
+      try {
+        const res = await fetch(`/api/profile/${user?.username || 'rehana_rahman'}/add-friend`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ friendUsername })
+        });
+        if (!res.ok) throw new Error('Failed to add friend');
+        const data = await res.json();
+        document.getElementById('friends-list').textContent = data.friends?.join(', ') || 'No friends';
+        document.getElementById('friend-username').value = '';
+      } catch (error) {
+        console.error('Error adding friend:', error);
+        alert('Failed to add friend');
+      }
+    });
   }
+}
 
-  // Initial load
-  fetchProfile();
-  fetchEvents();
-});
+// Events
+async function fetchEvents() {
+  if (!isBrowser) return;
+  try {
+    const response = await fetch('/api/events');
+    if (!response.ok) throw new Error('Failed to load events');
+    const events = await response.json();
+    const eventList = document.getElementById('event-list');
+    if (eventList) {
+      eventList.innerHTML = events.map(e => `
+        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+          <p><strong>${e.name}</strong></p>
+          <p>${e.description}</p>
+          <p class="text-gray-500 text-sm">${new Date(e.date).toLocaleString()}</p>
+        </div>
+      `).join('');
+    }
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    alert('Cannot load events');
+  }
+}
+
+// Stub for undefined functions
+async function fetchGroups() {
+  console.log('fetchGroups not implemented');
+}
+async function fetchChats() {
+  console.log('fetchChats not implemented');
+}
 
 // Tic-Tac-Toe Game
 let ticTacToeCurrentPlayer = 'X';
@@ -395,7 +400,7 @@ let snakeGameLoop;
 
 function initializeSnake() {
   const snakeCanvas = document.getElementById('snake-canvas');
-  const snakeCtx = snakeCanvas ? snakeCanvas.getContext('2d') : null;
+  const snakeCtx = snakeCanvas?.getContext('2d');
   const snakeScore = document.getElementById('snake-score');
   const snakeStatus = document.getElementById('snake-status');
   if (!snakeCanvas || !snakeCtx || !snakeScore || !snakeStatus) {
@@ -414,8 +419,8 @@ function initializeSnake() {
   snakeStatus.className = 'text-lg font-semibold text-blue-600';
   const startSnakeBtn = document.getElementById('start-snake');
   const restartSnakeBtn = document.getElementById('restart-snake');
-  startSnakeBtn.classList.remove('hidden');
-  restartSnakeBtn.classList.add('hidden');
+  if (startSnakeBtn) startSnakeBtn.classList.remove('hidden');
+  if (restartSnakeBtn) restartSnakeBtn.classList.add('hidden');
   clearInterval(snakeGameLoop);
   drawSnakeGame(snakeCtx, snakeCanvas);
 }
@@ -443,7 +448,7 @@ function drawSnakeGame(ctx, canvas) {
 
 function updateSnakeGame() {
   const snakeCanvas = document.getElementById('snake-canvas');
-  const snakeCtx = snakeCanvas ? snakeCanvas.getContext('2d') : null;
+  const snakeCtx = snakeCanvas?.getContext('2d');
   const snakeScore = document.getElementById('snake-score');
   const snakeStatus = document.getElementById('snake-status');
   if (!snakeGameActive || !snakeCtx) return;
@@ -609,11 +614,13 @@ if (isBrowser) {
 // Business
 async function fetchBusinesses() {
   if (!isBrowser) return;
+  const businessList = document.getElementById('business-list');
+  if (!businessList) return;
   try {
     const response = await fetch('/api/business');
     if (!response.ok) throw new Error('Failed to fetch businesses');
     const businesses = await response.json();
-    document.getElementById('business-list').innerHTML = businesses.map(b => `
+    businessList.innerHTML = businesses.map(b => `
       <div class="bg-blue-50 p-4 rounded-lg">
         <p><strong>${b.name}</strong> by ${b.username}</p>
         <p>${b.description}</p>
@@ -622,7 +629,7 @@ async function fetchBusinesses() {
     `).join('');
   } catch (error) {
     console.error('Error fetching businesses:', error);
-    document.getElementById('business-list').innerHTML = '<p class="text-red-600">Failed to load businesses</p>';
+    businessList.innerHTML = '<p class="text-red-600">Failed to load businesses</p>';
   }
 }
 
@@ -630,18 +637,23 @@ if (isBrowser) {
   const promoteBusinessBtn = document.getElementById('promote-business');
   if (promoteBusinessBtn) {
     promoteBusinessBtn.addEventListener('click', async () => {
-      const name = document.getElementById('business-name').value;
-      const description = document.getElementById('business-desc').value;
-      const link = document.getElementById('business-link').value;
+      const name = document.getElementById('business-name')?.value;
+      const description = document.getElementById('business-desc')?.value;
+      const link = document.getElementById('business-link')?.value;
+      if (!name || !description) return;
       try {
         await fetch('/api/business', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
           body: JSON.stringify({ name, description, link, userId: user?.id })
         });
         fetchBusinesses();
       } catch (error) {
         console.error('Error promoting business:', error);
+        alert('Failed to promote business');
       }
     });
   }
@@ -652,13 +664,17 @@ if (isBrowser) {
   const saveSettingsBtn = document.getElementById('save-settings');
   if (saveSettingsBtn) {
     saveSettingsBtn.addEventListener('click', async () => {
-      const profilePic = document.getElementById('profile-pic').files[0];
-      const profileName = document.getElementById('profile-name').value;
+      const profilePic = document.getElementById('profile-pic')?.files[0];
+      const profileName = document.getElementById('profile-name')?.value;
+      if (!profileName) return;
       const formData = new FormData();
-      formData.append('profilePic', profilePic);
+      if (profilePic) formData.append('profilePic', profilePic);
       formData.append('profileName', profileName);
       try {
-        await fetch('/api/settings', { method: 'POST', body: formData });
+        await fetch('/api/settings', {
+          method: 'POST',
+          body: formData
+        });
         alert('Settings updated successfully!');
       } catch (error) {
         console.error('Error saving settings:', error);
@@ -670,8 +686,9 @@ if (isBrowser) {
   const sendDmBtn = document.getElementById('send-dm');
   if (sendDmBtn) {
     sendDmBtn.addEventListener('click', async () => {
-      const username = document.getElementById('dm-username').value;
-      const message = document.getElementById('dm-message').value;
+      const username = document.getElementById('dm-username')?.value;
+      const message = document.getElementById('dm-message')?.value;
+      if (!username || !message) return;
       try {
         await fetch('/api/dm', {
           method: 'POST',
@@ -689,15 +706,17 @@ if (isBrowser) {
 
 // Initial load
 if (isBrowser) {
-  if (token && user) {
-    showSection('home');
-    fetchPosts();
-    loadProfile();
-    fetchGroups();
-    fetchChats();
-    fetchEvents();
-    fetchBusinesses();
-  } else {
-    showSection('post-comment');
-  }
+  document.addEventListener('DOMContentLoaded', () => {
+    if (token && user) {
+      showSection('home');
+      fetchPosts();
+      loadProfile();
+      fetchGroups();
+      fetchChats();
+      fetchEvents();
+      fetchBusinesses();
+    } else {
+      showSection('post-comment');
+    }
+  });
 }

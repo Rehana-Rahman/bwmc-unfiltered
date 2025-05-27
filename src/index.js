@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const collection = require('./config');
 const app = express();
 
-
 // Set view engine
 app.set('view engine', 'ejs'); 
 
