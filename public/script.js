@@ -1,722 +1,587 @@
-// script.js
+document.addEventListener('DOMContentLoaded', () => {
+    const settingsBtn = document.getElementById('settings-btn');
+    const changeProfileBtn = document.getElementById('change-profile-btn');
+    const openPostModalBtn = document.getElementById('open-post-modal');
+    const openStoryModalBtn = document.getElementById('open-story-modal');
+    const logoutBtn = document.getElementById('logout-btn');
+    const postModal = document.getElementById('post-modal');
+    const storyModal = document.getElementById('story-modal');
+    const settingsModal = document.getElementById('settings-modal');
+    const friendModal = document.getElementById('friend-modal');
+    const groupModal = document.getElementById('group-modal');
+    const closeModal = document.querySelectorAll('.close');
+    const submitPostBtn = document.getElementById('submit-post');
+    const submitStoryBtn = document.getElementById('submit-story');
+    const saveSettingsBtn = document.getElementById('save-settings');
+    const saveProfileBtn = document.getElementById('save-profile');
+    const submitFriendBtn = document.getElementById('submit-friend');
+    const createGroupBtn = document.getElementById('create-group');
+    const joinGroupBtn = document.getElementById('join-group');
+    const themeSelect = document.getElementById('theme-select');
+    const usernameInput = document.getElementById('username');
+    const profileDpInput = document.getElementById('profile-dp');
+    const bioInput = document.getElementById('bio');
+    const usernameView = document.getElementById('username-view');
+    const profileDpView = document.getElementById('profile-dp-view');
+    const bioView = document.getElementById('bio-view');
+    const storiesContainer = document.querySelector('.stories-container');
+    const storyViewer = document.getElementById('story-viewer');
+    const storyContent = document.getElementById('story-content');
+    const storyProgressBar = document.getElementById('story-progress-bar');
+    const toast = document.querySelector('.toast');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const homeSection = document.getElementById('home-section');
+    const aboutSection = document.getElementById('about-section');
+    const discussionsSection = document.getElementById('discussions-section');
+    const friendsSection = document.getElementById('friends-section');
+    const groupsSection = document.getElementById('groups-section');
+    const messagesSection = document.getElementById('messages-section');
+    const profileSection = document.getElementById('profile-section');
+    const postsSection = document.querySelector('.posts');
+    const sendDmBtn = document.getElementById('send-dm');
+    const dmText = document.getElementById('dm-text');
+    const dmList = document.querySelector('.dm-list');
+    const conversationList = document.querySelector('.conversation-list');
+    const chatUsername = document.getElementById('chat-username');
+    const postImageInput = document.getElementById('post-image');
+    const postImagePreview = document.getElementById('post-image-preview');
+    const postGroupSelect = document.getElementById('post-group');
+    const sendDiscussionBtn = document.getElementById('send-discussion');
+    const discussionText = document.getElementById('discussion-text');
+    const discussionList = document.querySelector('.discussion-list');
+    const addStoryBtn = document.querySelector('.add-story-btn');
+    const addFriendBtn = document.getElementById('add-friend-btn');
+    const manageGroupBtn = document.getElementById('manage-group-btn');
+    const friendsList = document.querySelector('.friends-list');
+    const groupsList = document.querySelector('.groups-list');
+    const friendUsernameInput = document.getElementById('friend-username');
+    const groupNameInput = document.getElementById('group-name');
 
-const isBrowser = typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+    // Simulated data
+    let profileData = {
+        username: 'YourUsername',
+        profileDp: 'https://via.placeholder.com/100',
+        bio: 'Your bio goes here...',
+        prevProfileDpUrl: null
+    };
 
-// Initialize token and user only in browser
-let token = null;
-let user = null;
-if (isBrowser) {
-  token = localStorage.getItem('token');
-  try {
-    user = token ? JSON.parse(atob(token.split('.')[1])) : null;
-  } catch (error) {
-    console.error('Error decoding token:', error);
-    localStorage.removeItem('token');
-    token = null;
-    user = null;
-  }
-}
+    let friends = ['User1'];
+    let groups = [];
+    let conversations = {
+        'User1': [
+            { type: 'sent', text: 'Hey, what\'s up?' },
+            { type: 'received', text: 'Not much, just chilling!' }
+        ],
+        'User2': []
+    };
 
-// Show/hide sections
-function showSection(sectionId) {
-  if (!isBrowser) return;
-  document.querySelectorAll('section').forEach(section => section.classList.add('hidden'));
-  const section = document.getElementById(sectionId);
-  if (section) {
-    section.classList.remove('hidden');
-    // Initialize games only when Games section is shown
-    if (sectionId === 'games') {
-      initializeTicTacToe();
-      initializeSnake();
-      initializeMemoryMatch();
+    let discussionMessages = [];
+    let postCounter = 2;
+    let postReactions = { '1': { likes: 0, dislikes: 0, comments: [] } };
+
+    // Simulated WebSocket for real-time discussions
+    let socket = null;
+    function initWebSocket() {
+        socket = {
+            send: (data) => {
+                const message = JSON.parse(data);
+                discussionMessages.push(message);
+                updateDiscussionWindow();
+                setTimeout(() => {
+                    const reply = {
+                        username: 'OtherUser',
+                        text: `Re: ${message.text}`,
+                        timestamp: new Date().toISOString()
+                    };
+                    discussionMessages.push(reply);
+                    updateDiscussionWindow();
+                }, 1000);
+            },
+            onmessage: null
+        };
     }
-  } else {
-    console.error(`Section #${sectionId} not found`);
-  }
-}
+    initWebSocket();
 
-// Navigation
-if (isBrowser) {
-  const navLinks = ['home', 'profile', 'groups', 'events', 'games', 'business', 'settings', 'dm'];
-  navLinks.forEach(id => {
-    const link = document.getElementById(`${id}-link`);
-    if (link) {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        showSection(id);
-      });
-    } else {
-      console.error(`Navigation link #${id}-link not found`);
+    // Update profile view
+    function updateProfileView() {
+        usernameView.textContent = profileData.username;
+        profileDpView.src = profileData.profileDp;
+        bioView.textContent = profileData.bio || 'No bio set.';
     }
-  });
+    updateProfileView();
 
-  const logoutLink = document.getElementById('logout-link');
-  if (logoutLink) {
-    logoutLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        const response = await fetch('/logout', { method: 'GET' });
-        if (!response.ok) {
-          throw new Error(`Logout failed with status: ${response.status}`);
+    // Update discussion window
+    function updateDiscussionWindow() {
+        discussionList.innerHTML = '';
+        discussionMessages.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `discussion-message ${msg.username === profileData.username ? 'sent' : 'received'}`;
+            messageDiv.innerHTML = `
+                <strong>${msg.username}</strong>: ${msg.text}
+                <span class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+            `;
+            discussionList.appendChild(messageDiv);
+        });
+        discussionList.scrollTop = discussionList.scrollHeight;
+    }
+
+    // Update friends list
+    function updateFriendsList() {
+        friendsList.innerHTML = '';
+        friends.forEach(friend => {
+            const friendItem = document.createElement('div');
+            friendItem.className = 'friend-item';
+            friendItem.innerHTML = `
+                <span>${friend}</span>
+                <button class="remove-friend-btn" data-username="${friend}">Remove</button>
+            `;
+            friendsList.appendChild(friendItem);
+        });
+    }
+    updateFriendsList();
+
+    // Update groups list
+    function updateGroupsList() {
+        groupsList.innerHTML = '';
+        postGroupSelect.innerHTML = '<option value="none">No Group</option>';
+        groups.forEach(group => {
+            const groupItem = document.createElement('div');
+            groupItem.className = 'group-item';
+            groupItem.innerHTML = `
+                <span>${group}</span>
+                <button class="leave-group-btn" data-group="${group}">Leave</button>
+            `;
+            groupsList.appendChild(groupItem);
+            const option = document.createElement('option');
+            option.value = group;
+            option.textContent = group;
+            postGroupSelect.appendChild(option);
+        });
+    }
+    updateGroupsList();
+
+    // Filter posts
+    function filterPosts(filter) {
+        const posts = document.querySelectorAll('.post-card');
+        posts.forEach(post => {
+            const username = post.dataset.username;
+            const group = post.dataset.group;
+            if (filter === 'all') {
+                post.style.display = 'block';
+            } else if (filter === 'friends' && friends.includes(username)) {
+                post.style.display = 'block';
+            } else if (filter === 'groups' && groups.includes(group)) {
+                post.style.display = 'block';
+            } else {
+                post.style.display = 'none';
+            }
+        });
+    }
+
+    // Navigation
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            const section = link.getAttribute('href').substring(1);
+            homeSection.style.display = section === 'home' ? 'block' : 'none';
+            aboutSection.style.display = section === 'about' ? 'block' : 'none';
+            discussionsSection.style.display = section === 'discussions' ? 'block' : 'none';
+            friendsSection.style.display = section === 'friends' ? 'block' : 'none';
+            groupsSection.style.display = section === 'groups' ? 'block' : 'none';
+            messagesSection.style.display = section === 'messages' ? 'block' : 'none';
+            profileSection.style.display = 'none';
+            if (section === 'discussions') {
+                updateDiscussionWindow();
+            } else if (section === 'friends') {
+                updateFriendsList();
+            } else if (section === 'groups') {
+                updateGroupsList();
+            }
+        });
+    });
+
+    // Profile Page
+    changeProfileBtn.addEventListener('click', () => {
+        homeSection.style.display = 'none';
+        aboutSection.style.display = 'none';
+        discussionsSection.style.display = 'none';
+        friendsSection.style.display = 'none';
+        groupsSection.style.display = 'none';
+        messagesSection.style.display = 'none';
+        profileSection.style.display = 'block';
+        navLinks.forEach(l => l.classList.remove('active'));
+    });
+
+    saveProfileBtn.addEventListener('click', () => {
+        const username = usernameInput.value.trim();
+        const bio = bioInput.value.trim();
+        const profileDp = profileDpInput.files[0];
+        let changes = [];
+
+        if (username) {
+            profileData.username = username;
+            changes.push('username');
         }
-        localStorage.removeItem('token');
-        window.location.href = '/';
-      } catch (error) {
-        console.error('Error during logout:', error);
-        alert('Logout failed. Please try again.');
-      }
-    });
-  }
-}
-
-// Post Modal
-if (isBrowser) {
-  const plusButton = document.getElementById('plus-button');
-  const closePostModal = document.getElementById('close-post-modal');
-  const submitPost = document.getElementById('submit-post');
-
-  if (plusButton) {
-    plusButton.addEventListener('click', () => {
-      const postModal = document.getElementById('post-modal');
-      if (postModal) postModal.classList.remove('hidden');
-    });
-  }
-  if (closePostModal) {
-    closePostModal.addEventListener('click', () => {
-      const postModal = document.getElementById('post-modal');
-      if (postModal) postModal.classList.add('hidden');
-    });
-  }
-  if (submitPost) {
-    submitPost.addEventListener('click', async () => {
-      const content = document.getElementById('post-content')?.value || '';
-      const link = document.getElementById('post-link')?.value || '';
-      try {
-        const response = await fetch('/api/posts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ content, link, userId: user?.id })
-        });
-        if (!response.ok) {
-          throw new Error('Failed to create post');
+        if (bio) {
+            profileData.bio = bio;
+            changes.push('bio');
         }
-        document.getElementById('post-content').value = '';
-        document.getElementById('post-link').value = '';
-        document.getElementById('post-modal').classList.add('hidden');
-        fetchPosts();
-      } catch (error) {
-        console.error('Error creating post:', error);
-        alert('Failed to create post. Please try again.');
-      }
+        if (profileDp) {
+            if (profileData.prevProfileDpUrl && profileData.prevProfileDpUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(profileData.prevProfileDp);
+            }
+            profileData.prevProfileDpUrl = URL.createObjectURL(profileDp);
+            profileData.profileDp = profileData.prevProfileDpUrl;
+            changes.push('profile logo');
+        }
+
+        if (changes.length > 0) {
+            updateProfileView();
+            showToast(`Updated ${changes.join(', ')}!`);
+            usernameInput.value = '';
+            bioInput.value = '';
+            profileDpInput.value = '';
+        } else {
+            showToast('No changes made!');
+        }
     });
-  }
-}
 
-// Post and Comment
-async function fetchPosts() {
-  if (!isBrowser) return;
-  const postsDiv = document.getElementById('posts');
-  if (!postsDiv) {
-    console.error('Posts container not found');
-    return;
-  }
-  try {
-    const response = await fetch('/api/posts');
-    if (!response.ok) throw new Error('Failed to fetch posts');
-    const posts = await response.json();
-    postsDiv.innerHTML = '';
-    for (const post of posts) {
-      const comments = await fetchComments(post.id);
-      postsDiv.innerHTML += `
-        <div class="bg-blue-50 p-4 rounded-lg mb-4">
-          <p><strong>${post.username}</strong>: ${post.content}</p>
-          ${post.link ? `<a href="${post.link}" class="text-blue-600" target="_blank">Link</a>` : ''}
-          <p class="text-gray-500 text-sm">${new Date(post.created_at).toLocaleString()}</p>
-          <div class="mt-2">
-            <h4 class="text-sm font-semibold">Comments</h4>
-            <div id="comments-${post.id}" class="ml-4">
-              ${comments.map(c => `<p class="text-sm"><strong>${c.username}</strong>: ${c.content}</p>`).join('')}
-            </div>
-            <input id="comment-${post.id}" class="w-full p-2 border rounded mt-2" placeholder="Add a comment...">
-            <button onclick="submitComment(${post.id})" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Comment</button>
-          </div>
-          <div class="mt-2">
-            <button id="like-${post.id}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Like</button>
-            <button id="share-${post.id}" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">Share</button>
-            <button id="follow-${post.id}" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Follow</button>
-          </div>
-        </div>
-      `;
-      addPostInteractions(post.id);
-    }
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    postsDiv.innerHTML = '<p class="text-red-600">Failed to load posts. Please try again later.</p>';
-  }
-}
+    // Settings Modal
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+    });
 
-function addPostInteractions(postId) {
-  const likeBtn = document.getElementById(`like-${postId}`);
-  const shareBtn = document.getElementById(`share-${postId}`);
-  const followBtn = document.getElementById(`follow-${postId}`);
-  if (likeBtn) {
-    likeBtn.addEventListener('click', async () => {
-      try {
-        const response = await fetch(`/api/posts/${postId}/like`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` }
+    saveSettingsBtn.addEventListener('click', () => {
+        const theme = themeSelect.value;
+        document.body.classList.toggle('dark-mode', theme === 'dark');
+        settingsModal.style.display = 'none';
+        showToast('Settings saved!');
+    });
+
+    // Post Modal
+    openPostModalBtn.addEventListener('click', () => {
+        postModal.style.display = 'flex';
+    });
+
+    postImageInput.addEventListener('change', () => {
+        if (postImageInput.files[0]) {
+            postImagePreview.src = URL.createObjectURL(postImageInput.files[0]);
+            postImagePreview.style.display = 'block';
+        } else {
+            postImagePreview.style.display = 'none';
+        }
+    });
+
+    submitPostBtn.addEventListener('click', () => {
+        const postText = document.getElementById('post-text').value.trim();
+        const postImage = postImageInput.files[0];
+        const postGroup = postGroupSelect.value;
+        if (postText || postImage) {
+            const postId = postCounter++;
+            postReactions[postId] = { likes: 0, dislikes: 0, comments: [] };
+            const postCard = document.createElement('div');
+            postCard.className = 'post-card';
+            postCard.dataset.postId = postId;
+            postCard.dataset.username = profileData.username;
+            postCard.dataset.group = postGroup;
+            let imageHtml = '';
+            if (postImage) {
+                imageHtml = `<div class="post-image-container"><img src="${URL.createObjectURL(postImage)}" alt="Post Image"></div>`;
+            }
+            postCard.innerHTML = `
+                <div class="post-header">
+                    <span class="post-username">${profileData.username}</span>
+                    <span class="post-tag">${postGroup === 'none' ? 'Campus Buzz' : postGroup}</span>
+                </div>
+                <div class="post-content">${postText}</div>
+                ${imageHtml}
+                <div class="post-reactions">
+                    <button class="reaction-btn like-btn" data-liked="false">❤️ <span class="like-count">0</span></button>
+                    <button class="reaction-btn dislike-btn" data-disliked="false">👎 <span class="dislike-count">0</span></button>
+                    <button class="reaction-btn comment-btn">💬 <span class="comment-count">0</span></button>
+                </div>
+                <div class="post-comments">
+                    <div class="comments-list"></div>
+                    <div class="comment-input">
+                        <input type="text" class="comment-text" placeholder="Add a comment...">
+                        <button class="submit-comment">Post</button>
+                    </div>
+                </div>
+                <button class="follow-btn">Follow</button>
+            `;
+            postsSection.prepend(postCard);
+            postModal.style.display = 'none';
+            document.getElementById('post-text').value = '';
+            postImageInput.value = '';
+            postImagePreview.style.display = 'none';
+            postGroupSelect.value = 'none';
+            showToast('Post created!');
+        }
+    });
+
+    // Post Reactions and Comments
+    postsSection.addEventListener('click', (e) => {
+        const target = e.target.closest('.reaction-btn, .submit-comment');
+        if (!target) return;
+        const postCard = target.closest('.post-card');
+        const postId = postCard.dataset.postId;
+
+        if (target.classList.contains('like-btn')) {
+            const liked = target.dataset.liked === 'true';
+            target.dataset.liked = !liked;
+            postReactions[postId].likes += liked ? -1 : 1;
+            target.querySelector('.like-count').textContent = postReactions[postId].likes;
+            target.classList.toggle('active', !liked);
+        } else if (target.classList.contains('dislike-btn')) {
+            const disliked = target.dataset.disliked === 'true';
+            target.dataset.disliked = !disliked;
+            postReactions[postId].dislikes += disliked ? -1 : 1;
+            target.querySelector('.dislike-count').textContent = postReactions[postId].dislikes;
+            target.classList.toggle('active', !disliked);
+        } else if (target.classList.contains('submit-comment')) {
+            const commentText = postCard.querySelector('.comment-text').value.trim();
+            if (commentText) {
+                postReactions[postId].comments.push(commentText);
+                const comment = document.createElement('div');
+                comment.className = 'comment';
+                comment.textContent = `${profileData.username}: ${commentText}`;
+                postCard.querySelector('.comments-list').appendChild(comment);
+                postCard.querySelector('.comment-count').textContent = postReactions[postId].comments.length;
+                postCard.querySelector('.comment-text').value = '';
+                showToast('Comment added!');
+            } else {
+                showToast('Please enter a comment!');
+            }
+        }
+    });
+
+    // Filter Buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.dataset.filter;
+            filterPosts(filter);
         });
-        if (!response.ok) throw new Error('Failed to like post');
-        alert('Post liked!');
-      } catch (error) {
-        console.error('Error liking post:', error);
-      }
     });
-  }
-  if (shareBtn) {
-    shareBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(`${window.location.origin}/posts/${postId}`);
-      alert('Post link copied to clipboard!');
+
+    // Friends Modal
+    addFriendBtn.addEventListener('click', () => {
+        friendModal.style.display = 'flex';
     });
-  }
-  if (followBtn) {
-    followBtn.addEventListener('click', async () => {
-      try {
-        const response = await fetch(`/api/users/${postId}/follow`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('Failed to follow user');
-        alert('User followed!');
-      } catch (error) {
-        console.error('Error following user:', error);
-      }
+
+    submitFriendBtn.addEventListener('click', () => {
+        const username = friendUsernameInput.value.trim();
+        if (username && !friends.includes(username) && username !== profileData.username) {
+            friends.push(username);
+            updateFriendsList();
+            friendModal.style.display = 'none';
+            friendUsernameInput.value = '';
+            showToast('Friend added!');
+            if (!conversations[username]) {
+                conversations[username] = [];
+            }
+        } else {
+            showToast('Invalid or duplicate username!');
+        }
     });
-  }
-}
 
-async function fetchComments(postId) {
-  try {
-    const response = await fetch(`/api/comments/${postId}`);
-    if (!response.ok) throw new Error('Failed to fetch comments');
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching comments:', error);
-    return [];
-  }
-}
-
-async function submitComment(postId) {
-  if (!isBrowser) return;
-  const input = document.getElementById(`comment-${postId}`);
-  if (!input) return;
-  const content = input.value;
-  if (!content) return;
-  try {
-    await fetch('/api/comments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ postId, userId: user?.id, content })
+    // Remove Friend
+    friendsList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-friend-btn')) {
+            const username = e.target.dataset.username;
+            friends = friends.filter(f => f !== username);
+            updateFriendsList();
+            showToast('Friend removed!');
+        }
     });
-    input.value = '';
-    fetchPosts();
-  } catch (error) {
-    console.error('Error submitting comment:', error);
-  }
-}
 
-// Profile
-async function loadProfile() {
-  if (!isBrowser) return;
-  const username = user?.username || 'rehana_rahman'; // Fallback username
-  try {
-    const res = await fetch(`/api/profile/${username}`);
-    if (!res.ok) throw new Error('Failed to load profile');
-    const profile = await res.json();
-    document.getElementById('username-display').textContent = profile.username || 'Unknown';
-    document.getElementById('bio-display').textContent = profile.bio || 'No bio';
-    document.getElementById('friends-list').textContent = profile.friends?.join(', ') || 'No friends';
-    document.getElementById('profile').classList.remove('hidden');
-  } catch (error) {
-    console.error('Error loading profile:', error);
-    alert('Failed to load profile');
-  }
-}
-
-if (isBrowser) {
-  const addFriendBtn = document.getElementById('add-friend');
-  if (addFriendBtn) {
-    addFriendBtn.addEventListener('click', async () => {
-      const friendUsername = document.getElementById('friend-username')?.value;
-      if (!friendUsername) return;
-      try {
-        const res = await fetch(`/api/profile/${user?.username || 'rehana_rahman'}/add-friend`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ friendUsername })
-        });
-        if (!res.ok) throw new Error('Failed to add friend');
-        const data = await res.json();
-        document.getElementById('friends-list').textContent = data.friends?.join(', ') || 'No friends';
-        document.getElementById('friend-username').value = '';
-      } catch (error) {
-        console.error('Error adding friend:', error);
-        alert('Failed to add friend');
-      }
+    // Groups Modal
+    manageGroupBtn.addEventListener('click', () => {
+        groupModal.style.display = 'flex';
     });
-  }
-}
 
-// Events
-async function fetchEvents() {
-  if (!isBrowser) return;
-  try {
-    const response = await fetch('/api/events');
-    if (!response.ok) throw new Error('Failed to load events');
-    const events = await response.json();
-    const eventList = document.getElementById('event-list');
-    if (eventList) {
-      eventList.innerHTML = events.map(e => `
-        <div class="bg-blue-50 p-4 rounded-lg mb-4">
-          <p><strong>${e.name}</strong></p>
-          <p>${e.description}</p>
-          <p class="text-gray-500 text-sm">${new Date(e.date).toLocaleString()}</p>
-        </div>
-      `).join('');
+    createGroupBtn.addEventListener('click', () => {
+        const groupName = groupNameInput.value.trim();
+        if (groupName && !groups.includes(groupName)) {
+            groups.push(groupName);
+            updateGroupsList();
+            groupModal.style.display = 'none';
+            groupNameInput.value = '';
+            showToast('Group created!');
+        } else {
+            showToast('Invalid or duplicate group name!');
+        }
+    });
+
+    joinGroupBtn.addEventListener('click', () => {
+        const groupName = groupNameInput.value.trim();
+        if (groupName && !groups.includes(groupName)) {
+            groups.push(groupName);
+            updateGroupsList();
+            groupModal.style.display = 'none';
+            groupNameInput.value = '';
+            showToast('Joined group!');
+        } else {
+            showToast('Invalid or duplicate group name!');
+        }
+    });
+
+    // Leave Group
+    groupsList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('leave-group-btn')) {
+            const group = e.target.dataset.group;
+            groups = groups.filter(g => g !== group);
+            updateGroupsList();
+            showToast('Left group!');
+        }
+    });
+
+    // Story Modal
+    openStoryModalBtn.addEventListener('click', () => {
+        storyModal.style.display = 'flex';
+    });
+
+    addStoryBtn.addEventListener('click', () => {
+        storyModal.style.display = 'flex';
+    });
+
+    submitStoryBtn.addEventListener('click', () => {
+        const storyImage = document.getElementById('story-image').files[0];
+        if (storyImage) {
+            const story = document.createElement('div');
+            story.className = 'story';
+            const storyImgSrc = URL.createObjectURL(storyImage);
+            story.innerHTML = `
+                <img src="${storyImgSrc}" alt="Profile Story">
+                <p>${profileData.username}</p>
+            `;
+            storiesContainer.appendChild(story);
+            storyModal.style.display = 'none';
+            document.getElementById('story-image').value = '';
+            showToast('Story added!');
+        }
+    });
+
+    // Story Viewer
+    storiesContainer.addEventListener('click', (e) => {
+        const story = e.target.closest('.story');
+        if (story) {
+            const imgSrc = story.querySelector('img').src;
+            openStory(imgSrc);
+        }
+    });
+
+    function openStory(imgSrc) {
+        storyContent.src = imgSrc;
+        storyViewer.style.display = 'flex';
+        storyProgressBar.style.width = '0%';
+        let progress = 0;
+        let interval = setInterval(() => {
+            progress += 1;
+            storyProgressBar.style.width = `${progress}%`;
+            if (progress >= 100) {
+                clearInterval(interval);
+                storyViewer.style.display = 'none';
+            }
+        }, 50);
+        storyViewer.addEventListener('click', () => {
+            clearInterval(interval);
+            storyViewer.style.display = 'none';
+            storyProgressBar.style.width = '0%';
+        }, { once: true });
     }
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    alert('Cannot load events');
-  }
-}
 
-// Stub for undefined functions
-async function fetchGroups() {
-  console.log('fetchGroups not implemented');
-}
-async function fetchChats() {
-  console.log('fetchChats not implemented');
-}
-
-// Tic-Tac-Toe Game
-let ticTacToeCurrentPlayer = 'X';
-let ticTacToeBoard = ['', '', '', '', '', '', '', '', ''];
-let ticTacToeGameActive = true;
-
-function initializeTicTacToe() {
-  const ticTacToe = document.getElementById('tic-tac-toe');
-  const ticTacToeStatus = document.getElementById('tic-tac-toe-status');
-  if (!ticTacToe || !ticTacToeStatus) {
-    console.error('Tic-Tac-Toe elements not found');
-    return;
-  }
-  ticTacToe.innerHTML = '';
-  ticTacToeBoard = ['', '', '', '', '', '', '', '', ''];
-  ticTacToeGameActive = true;
-  ticTacToeCurrentPlayer = 'X';
-  ticTacToeStatus.textContent = `Player ${ticTacToeCurrentPlayer}'s Turn`;
-  ticTacToeStatus.className = 'text-center mb-4 text-lg font-semibold text-blue-600';
-
-  for (let i = 0; i < 9; i++) {
-    const cell = document.createElement('div');
-    cell.className = 'bg-white border-2 border-blue-600 p-4 text-center text-3xl font-bold h-16 flex items-center justify-center cursor-pointer hover:bg-blue-100';
-    cell.dataset.index = i;
-    cell.addEventListener('click', handleTicTacToeCellClick);
-    ticTacToe.appendChild(cell);
-  }
-}
-
-function checkTicTacToeWin() {
-  const winningCombinations = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-    [0, 4, 8], [2, 4, 6] // Diagonals
-  ];
-
-  for (const combination of winningCombinations) {
-    const [a, b, c] = combination;
-    if (ticTacToeBoard[a] && ticTacToeBoard[a] === ticTacToeBoard[b] && ticTacToeBoard[a] === ticTacToeBoard[c]) {
-      ticTacToeGameActive = false;
-      return true;
-    }
-  }
-
-  if (!ticTacToeBoard.includes('')) {
-    ticTacToeGameActive = false;
-    return true;
-  }
-
-  return false;
-}
-
-function handleTicTacToeCellClick(e) {
-  const ticTacToeStatus = document.getElementById('tic-tac-toe-status');
-  const index = parseInt(e.target.dataset.index);
-  if (isNaN(index) || ticTacToeBoard[index] || !ticTacToeGameActive) return;
-
-  ticTacToeBoard[index] = ticTacToeCurrentPlayer;
-  e.target.textContent = ticTacToeCurrentPlayer;
-  e.target.classList.add(ticTacToeCurrentPlayer === 'X' ? 'text-blue-600' : 'text-red-600');
-  e.target.classList.remove('cursor-pointer', 'hover:bg-blue-100');
-
-  const winResult = checkTicTacToeWin();
-  if (winResult) {
-    ticTacToeStatus.textContent = ticTacToeBoard.includes('') ? `Player ${ticTacToeCurrentPlayer} Wins!` : "It's a Draw!";
-    ticTacToeStatus.className = 'text-center mb-4 text-lg font-semibold ' + (ticTacToeBoard.includes('') ? 'text-green-600' : 'text-yellow-600');
-  } else {
-    ticTacToeCurrentPlayer = ticTacToeCurrentPlayer === 'X' ? 'O' : 'X';
-    ticTacToeStatus.textContent = `Player ${ticTacToeCurrentPlayer}'s Turn`;
-  }
-
-  fetch('/api/games/tic-tac-toe', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ board: ticTacToeBoard, player: ticTacToeCurrentPlayer })
-  }).catch(error => console.error('Error sending Tic-Tac-Toe state:', error));
-}
-
-if (isBrowser) {
-  const resetTicTacToe = document.getElementById('reset-tic-tac-toe');
-  if (resetTicTacToe) {
-    resetTicTacToe.addEventListener('click', initializeTicTacToe);
-  }
-}
-
-// Snake Game
-const gridSize = 20;
-let snake = [{ x: 10, y: 10 }];
-let food = { x: 15, y: 15 };
-let dx = 1;
-let dy = 0;
-let snakeScoreValue = 0;
-let snakeGameActive = false;
-let snakeGameLoop;
-
-function initializeSnake() {
-  const snakeCanvas = document.getElementById('snake-canvas');
-  const snakeCtx = snakeCanvas?.getContext('2d');
-  const snakeScore = document.getElementById('snake-score');
-  const snakeStatus = document.getElementById('snake-status');
-  if (!snakeCanvas || !snakeCtx || !snakeScore || !snakeStatus) {
-    console.error('Snake game elements not found');
-    return;
-  }
-  const tileCount = snakeCanvas.width / gridSize;
-  snake = [{ x: 10, y: 10 }];
-  food = generateSnakeFood(tileCount);
-  dx = 1;
-  dy = 0;
-  snakeScoreValue = 0;
-  snakeGameActive = false;
-  snakeScore.textContent = `Score: ${snakeScoreValue}`;
-  snakeStatus.textContent = 'Press Start to Play';
-  snakeStatus.className = 'text-lg font-semibold text-blue-600';
-  const startSnakeBtn = document.getElementById('start-snake');
-  const restartSnakeBtn = document.getElementById('restart-snake');
-  if (startSnakeBtn) startSnakeBtn.classList.remove('hidden');
-  if (restartSnakeBtn) restartSnakeBtn.classList.add('hidden');
-  clearInterval(snakeGameLoop);
-  drawSnakeGame(snakeCtx, snakeCanvas);
-}
-
-function generateSnakeFood(tileCount) {
-  const x = Math.floor(Math.random() * tileCount);
-  const y = Math.floor(Math.random() * tileCount);
-  if (snake.some(segment => segment.x === x && segment.y === y)) {
-    return generateSnakeFood(tileCount);
-  }
-  return { x, y };
-}
-
-function drawSnakeGame(ctx, canvas) {
-  if (!ctx) return;
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#2563eb';
-  snake.forEach(segment => {
-    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
-  });
-  ctx.fillStyle = '#dc2626';
-  ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
-}
-
-function updateSnakeGame() {
-  const snakeCanvas = document.getElementById('snake-canvas');
-  const snakeCtx = snakeCanvas?.getContext('2d');
-  const snakeScore = document.getElementById('snake-score');
-  const snakeStatus = document.getElementById('snake-status');
-  if (!snakeGameActive || !snakeCtx) return;
-
-  const tileCount = snakeCanvas.width / gridSize;
-  const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-
-  if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount || snake.slice(1).some(s => s.x === head.x && s.y === head.y)) {
-    snakeGameActive = false;
-    snakeStatus.textContent = 'Game Over! Press Restart to Play Again';
-    snakeStatus.className = 'text-lg font-semibold text-red-600';
-    document.getElementById('start-snake').classList.add('hidden');
-    document.getElementById('restart-snake').classList.remove('hidden');
-    clearInterval(snakeGameLoop);
-    return;
-  }
-
-  snake.unshift(head);
-  if (head.x === food.x && head.y === food.y) {
-    snakeScoreValue += 10;
-    snakeScore.textContent = `Score: ${snakeScoreValue}`;
-    food = generateSnakeFood(tileCount);
-  } else {
-    snake.pop();
-  }
-  drawSnakeGame(snakeCtx, snakeCanvas);
-}
-
-if (isBrowser) {
-  document.addEventListener('keydown', (e) => {
-    if (!snakeGameActive) return;
-    switch (e.key) {
-      case 'ArrowUp':
-        if (dy === 0) { dx = 0; dy = -1; }
-        break;
-      case 'ArrowDown':
-        if (dy === 0) { dx = 0; dy = 1; }
-        break;
-      case 'ArrowLeft':
-        if (dx === 0) { dx = -1; dy = 0; }
-        break;
-      case 'ArrowRight':
-        if (dx === 0) { dx = 1; dy = 0; }
-        break;
-    }
-  });
-
-  const startSnakeBtn = document.getElementById('start-snake');
-  if (startSnakeBtn) {
-    startSnakeBtn.addEventListener('click', () => {
-      if (!snakeGameActive) {
-        snakeGameActive = true;
-        document.getElementById('snake-status').textContent = 'Playing...';
-        snakeGameLoop = setInterval(updateSnakeGame, 100);
-        startSnakeBtn.classList.add('hidden');
-        document.getElementById('restart-snake').classList.remove('hidden');
-        updateSnakeGame();
-      }
-    });
-  }
-
-  const restartSnakeBtn = document.getElementById('restart-snake');
-  if (restartSnakeBtn) {
-    restartSnakeBtn.addEventListener('click', () => {
-      initializeSnake();
-      snakeGameActive = true;
-      document.getElementById('snake-status').textContent = 'Playing...';
-      snakeGameLoop = setInterval(updateSnakeGame, 100);
-    });
-  }
-}
-
-// Memory Match Game
-const emojis = ['🐶', '🐱', '🐰', '🦁', '🐯', '🐼', '🐵', '🦊'];
-let memoryCards = [];
-let flippedCards = [];
-let matchedPairs = 0;
-let moves = 0;
-let memoryGameActive = true;
-
-function initializeMemoryMatch() {
-  const memoryGame = document.getElementById('memory-game');
-  const memoryMoves = document.getElementById('memory-moves');
-  const memoryStatus = document.getElementById('memory-status');
-  if (!memoryGame || !memoryMoves || !memoryStatus) {
-    console.error('Memory Match elements not found');
-    return;
-  }
-  memoryGame.innerHTML = '';
-  memoryCards = [];
-  flippedCards = [];
-  matchedPairs = 0;
-  moves = 0;
-  memoryGameActive = true;
-  memoryMoves.textContent = `Moves: ${moves}`;
-  memoryStatus.textContent = 'Match the cards!';
-  memoryStatus.className = 'text-lg font-semibold text-blue-600';
-
-  const cardValues = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
-  cardValues.forEach((value, index) => {
-    const card = document.createElement('div');
-    card.className = 'bg-blue-200 border-2 border-blue-600 p-4 text-3xl text-center h-16 w-16 flex items-center justify-center cursor-pointer hover:bg-blue-300';
-    card.dataset.index = index;
-    card.dataset.value = value;
-    card.textContent = '❓';
-    card.addEventListener('click', handleMemoryCardClick);
-    memoryGame.appendChild(card);
-    memoryCards.push({ element: card, value, flipped: false, matched: false });
-  });
-}
-
-function handleMemoryCardClick(e) {
-  if (!memoryGameActive) return;
-  const index = parseInt(e.target.dataset.index);
-  const card = memoryCards[index];
-  if (card.flipped || card.matched) return;
-
-  card.flipped = true;
-  card.element.textContent = card.value;
-  card.element.classList.add('bg-blue-400');
-  flippedCards.push(card);
-
-  if (flippedCards.length === 2) {
-    moves++;
-    document.getElementById('memory-moves').textContent = `Moves: ${moves}`;
-    const [card1, card2] = flippedCards;
-
-    if (card1.value === card2.value) {
-      card1.matched = true;
-      card2.matched = true;
-      card1.element.classList.add('bg-green-200');
-      card2.element.classList.add('bg-green-200');
-      matchedPairs++;
-      flippedCards = [];
-      if (matchedPairs === emojis.length) {
-        memoryGameActive = false;
-        document.getElementById('memory-status').textContent = 'You Win! Press Reset to Play Again';
-        document.getElementById('memory-status').className = 'text-lg font-semibold text-green-600';
-      }
-    } else {
-      memoryGameActive = false;
-      setTimeout(() => {
-        card1.flipped = false;
-        card2.flipped = false;
-        card1.element.textContent = '❓';
-        card2.element.textContent = '❓';
-        card1.element.classList.remove('bg-blue-400');
-        card2.element.classList.remove('bg-blue-400');
-        flippedCards = [];
-        memoryGameActive = true;
-      }, 1000);
-    }
-  }
-}
-
-if (isBrowser) {
-  const resetMemoryBtn = document.getElementById('reset-memory');
-  if (resetMemoryBtn) {
-    resetMemoryBtn.addEventListener('click', initializeMemoryMatch);
-  }
-}
-
-// Business
-async function fetchBusinesses() {
-  if (!isBrowser) return;
-  const businessList = document.getElementById('business-list');
-  if (!businessList) return;
-  try {
-    const response = await fetch('/api/business');
-    if (!response.ok) throw new Error('Failed to fetch businesses');
-    const businesses = await response.json();
-    businessList.innerHTML = businesses.map(b => `
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <p><strong>${b.name}</strong> by ${b.username}</p>
-        <p>${b.description}</p>
-        ${b.link ? `<a href="${b.link}" class="text-blue-600" target="_blank">Link</a>` : ''}
-      </div>
-    `).join('');
-  } catch (error) {
-    console.error('Error fetching businesses:', error);
-    businessList.innerHTML = '<p class="text-red-600">Failed to load businesses</p>';
-  }
-}
-
-if (isBrowser) {
-  const promoteBusinessBtn = document.getElementById('promote-business');
-  if (promoteBusinessBtn) {
-    promoteBusinessBtn.addEventListener('click', async () => {
-      const name = document.getElementById('business-name')?.value;
-      const description = document.getElementById('business-desc')?.value;
-      const link = document.getElementById('business-link')?.value;
-      if (!name || !description) return;
-      try {
-        await fetch('/api/business', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ name, description, link, userId: user?.id })
+    // Modal Close
+    closeModal.forEach(close => {
+        close.addEventListener('click', () => {
+            close.parentElement.parentElement.style.display = 'none';
         });
-        fetchBusinesses();
-      } catch (error) {
-        console.error('Error promoting business:', error);
-        alert('Failed to promote business');
-      }
     });
-  }
-}
 
-// Settings and DM
-if (isBrowser) {
-  const saveSettingsBtn = document.getElementById('save-settings');
-  if (saveSettingsBtn) {
-    saveSettingsBtn.addEventListener('click', async () => {
-      const profilePic = document.getElementById('profile-pic')?.files[0];
-      const profileName = document.getElementById('profile-name')?.value;
-      if (!profileName) return;
-      const formData = new FormData();
-      if (profilePic) formData.append('profilePic', profilePic);
-      formData.append('profileName', profileName);
-      try {
-        await fetch('/api/settings', {
-          method: 'POST',
-          body: formData
-        });
-        alert('Settings updated successfully!');
-      } catch (error) {
-        console.error('Error saving settings:', error);
-        alert('Failed to save settings');
-      }
-    });
-  }
+    // Messaging
+    let currentConversation = null;
 
-  const sendDmBtn = document.getElementById('send-dm');
-  if (sendDmBtn) {
-    sendDmBtn.addEventListener('click', async () => {
-      const username = document.getElementById('dm-username')?.value;
-      const message = document.getElementById('dm-message')?.value;
-      if (!username || !message) return;
-      try {
-        await fetch('/api/dm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, message })
-        });
-        alert('Message sent successfully!');
-      } catch (error) {
-        console.error('Error sending DM:', error);
-        alert('Failed to send message');
-      }
-    });
-  }
-}
-
-// Initial load
-if (isBrowser) {
-  document.addEventListener('DOMContentLoaded', () => {
-    if (token && user) {
-      showSection('home');
-      fetchPosts();
-      loadProfile();
-      fetchGroups();
-      fetchChats();
-      fetchEvents();
-      fetchBusinesses();
-    } else {
-      showSection('post-comment');
+    function updateChatWindow(user) {
+        currentConversation = user;
+        chatUsername.textContent = user || 'Select a conversation';
+        dmList.innerHTML = '';
+        if (user && conversations[user]) {
+            conversations[user].forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `dm-message ${msg.type}`;
+                messageDiv.textContent = msg.text;
+                dmList.appendChild(messageDiv);
+            });
+            dmList.scrollTop = dmList.scrollHeight;
+        }
     }
-  });
-}
+
+    conversationList.addEventListener('click', (e) => {
+        const conversation = e.target.closest('.conversation');
+        if (conversation) {
+            document.querySelectorAll('.conversation').forEach(c => c.classList.remove('active'));
+            conversation.classList.add('active');
+            const user = conversation.dataset.user;
+            updateChatWindow(user);
+        }
+    });
+
+    sendDmBtn.addEventListener('click', () => {
+        const message = dmText.value.trim();
+        if (message && currentConversation) {
+            conversations[currentConversation].push({ type: 'sent', text: message });
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'dm-message sent';
+            messageDiv.textContent = message;
+            dmList.appendChild(messageDiv);
+            dmList.scrollTop = dmList.scrollHeight;
+            dmText.value = '';
+            showToast('Message sent!');
+            setTimeout(() => {
+                conversations[currentConversation].push({ type: 'received', text: 'Got your message!' });
+                const replyDiv = document.createElement('div');
+                replyDiv.className = 'dm-message received';
+                replyDiv.textContent = 'Got your message!';
+                dmList.appendChild(replyDiv);
+                dmList.scrollTop = dmList.scrollHeight;
+            }, 1000);
+        }
+    });
+
+    // Discussions
+    sendDiscussionBtn.addEventListener('click', () => {
+        const message = discussionText.value.trim();
+        if (message) {
+            const msgObj = {
+                username: profileData.username,
+                text: message,
+                timestamp: new Date().toISOString()
+            };
+            socket.send(JSON.stringify(msgObj));
+            discussionText.value = '';
+            showToast('Message sent!');
+        } else {
+            showToast('Please enter a message!');
+        }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', () => {
+        showToast('Logging out...');
+        setTimeout(() => {
+            window.location.href = 'http://localhost:3000/';
+        }, 3000);
+    });
+
+    // Toast Notification
+    function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+});

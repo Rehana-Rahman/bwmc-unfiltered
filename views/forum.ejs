@@ -1,187 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BWMC Unfiltered</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/output.css">
-  <link rel="stylesheet" href="/styles.css">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bwmc Unfiltered</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
-<body class="text-gray-800 min-h-screen">
-  <!-- Navigation Bar -->
-  <nav class="bg-blue-600 text-white p-4 sticky top-0 z-10">
-    <div class="container mx-auto max-w-4xl flex flex-col sm:flex-row justify-between items-center">
-      <h1 class="text-2xl font-bold mb-2 sm:mb-0">BWMC Unfiltered</h1>
-      <div class="flex flex-wrap justify-center sm:space-x-4">
-        <a href="#home" class="hover:underline px-2 py-1" id="home-link">Home</a>
-        <a href="#profile" class="hover:underline px-2 py-1" id="profile-link">Profile</a>
-        <a href="#groups" class="hover:underline px-2 py-1" id="groups-link">Groups</a>
-        <a href="#events" class="hover:underline px-2 py-1" id="events-link">Events</a>
-        <a href="#games" class="hover:underline px-2 py-1" id="games-link">Games</a>
-        <a href="#business" class="hover:underline px-2 py-1" id="business-link">Promote Business</a>
-        <a href="#settings" class="hover:underline px-2 py-1" id="settings-link">Settings</a>
-        <a href="/dm" id="dm-link">
-          <i class="fas fa-envelope"></i>
-        </a>
-        <a href="#" class="hover:underline px-2 py-1" id="logout-link">Logout</a>
-      </div>
+<body>
+    <div class="hamburger-menu">☰</div>
+    <div class="sidebar">
+        <div class="logo-container">
+            <img id="logo" src="image.jpg" alt="Logo Placeholder">
+            <h2>Bwmc Unfiltered</h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#discussions" class="nav-link">Discussions</a></li>
+                <li><a href="#friends" class="nav-link">Friends</a></li>
+                <li><a href="#groups" class="nav-link">Groups</a></li>
+                <li><button id="settings-btn" class="nav-btn">Settings</button></li>
+                <li><button id="change-profile-btn" class="nav-btn">Profile</button></li>
+                <li><button id="open-post-modal" class="nav-btn">Create Post</button></li>
+                <li><button id="open-story-modal" class="nav-btn">Add Story</button></li>
+                <li><a href="#messages" class="nav-link">Messages</a></li>
+                <li><button id="logout-btn" class="nav-btn">Logout</button></li>
+            </ul>
+        </nav>
     </div>
-  </nav>
-
-  <!-- Main Content -->
-  <div class="container mx-auto max-w-4xl p-6">
-    <!-- Post Modal -->
-    <div id="post-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
-      <div class="bg-white p-6 rounded-lg w-full max-w-md">
-        <h2 class="text-2xl font-semibold text-blue-600 mb-4">Create a Post</h2>
-        <textarea id="post-content" class="w-full p-2 border rounded" placeholder="What's on your mind?"></textarea>
-        <input id="post-link" type="url" class="w-full p-2 border rounded mt-2" placeholder="Add a link (optional)">
-        <div class="flex justify-end mt-4 space-x-2">
-          <button id="close-post-modal" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
-          <button id="submit-post" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Post</button>
+    <div class="main-content">
+        <div id="home-section">
+            <header>
+                <h1>Bwmc Unfiltered</h1>
+                <p class="tagline">Not Your Regular College Board</p>
+            </header>
+            <div class="stories-container">
+                <div class="add-story-btn">
+                    <div class="add-story-icon">+</div>
+                    <p>Add Story</p>
+                </div>
+            </div>
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="friends">Friends</button>
+                <button class="filter-btn" data-filter="groups">Groups</button>
+            </div>
+            <div class="posts">
+                <div class="post-card" data-post-id="1" data-username="User1" data-group="none">
+                    <div class="post-header">
+                        <span class="post-username">User1</span>
+                        <span class="post-tag">Campus Buzz</span>
+                    </div>
+                    <div class="post-content">Excited for the upcoming fest! 🎉</div>
+                    <div class="post-image-container"></div>
+                    <div class="post-reactions">
+                        <button class="reaction-btn like-btn" data-liked="false">❤️ <span class="like-count">0</span></button>
+                        <button class="reaction-btn dislike-btn" data-disliked="false">👎 <span class="dislike-count">0</span></button>
+                        <button class="reaction-btn comment-btn">💬 <span class="comment-count">0</span></button>
+                    </div>
+                    <div class="post-comments">
+                        <div class="comments-list"></div>
+                        <div class="comment-input">
+                            <input type="text" class="comment-text" placeholder="Add a comment...">
+                            <button class="submit-comment">Post</button>
+                        </div>
+                    </div>
+                    <button class="follow-btn">Follow</button>
+                </div>
+            </div>
         </div>
-      </div>
+        <div id="about-section" style="display: none;">
+            <div class="about-container">
+                <header>
+                    <h1>About Bwmc Unfiltered</h1>
+                    <p class="tagline">Connecting the College Community</p>
+                </header>
+                <div class="about-content">
+                    <h2>Our Mission</h2>
+                    <p>Bwmc Unfiltered is a vibrant platform designed to bring college students together, fostering open communication, creativity, and community engagement. We aim to provide a space where you can share your thoughts, stories, and experiences without filters.</p>
+                    <h2>Features</h2>
+                    <ul>
+                        <li>Share posts and stories with your peers</li>
+                        <li>Engage in real-time discussions</li>
+                        <li>Connect through private messages</li>
+                        <li>Customize your profile and experience</li>
+                    </ul>
+                    <h2>Contact Us</h2>
+                    <p>Have questions or feedback? Reach out to us at <a href="mailto:support@bwmcunfiltered.com">support@bwmcunfiltered.com</a>.</p>
+                </div>
+            </div>
+        </div>
+        <div id="discussions-section" style="display: none;">
+            <div class="discussions-container">
+                <header>
+                    <h1>Discussions</h1>
+                    <p class="tagline">Join the conversation in real-time!</p>
+                </header>
+                <div class="discussion-list">
+                    <div class="discussion-message"></div>
+                </div>
+                <div class="discussion-input">
+                    <input type="text" id="discussion-text" placeholder="Type your message...">
+                    <button id="send-discussion">Send</button>
+                </div>
+            </div>
+        </div>
+        <div id="friends-section" style="display: none;">
+            <div class="friends-container">
+                <header>
+                    <h1>Friends</h1>
+                    <p class="tagline">Connect with your college buddies!</p>
+                </header>
+                <button id="add-friend-btn" class="nav-btn">Add Friend</button>
+                <div class="friends-list"></div>
+            </div>
+        </div>
+        <div id="groups-section" style="display: none;">
+            <div class="groups-container">
+                <header>
+                    <h1>Groups</h1>
+                    <p class="tagline">Join or create communities!</p>
+                </header>
+                <button id="manage-group-btn" class="nav-btn">Manage Groups</button>
+                <div class="groups-list"></div>
+            </div>
+        </div>
+        <div id="messages-section" style="display: none;">
+            <div class="messages-container">
+                <div class="conversation-list">
+                    <h3>Conversations</h3>
+                    <div class="conversation" data-user="User1">
+                        <img src="https://via.placeholder.com/40" alt="User1">
+                        <span>User1</span>
+                    </div>
+                    <div class="conversation" data-user="User2">
+                        <img src="https://via.placeholder.com/40" alt="User2">
+                        <span>User2</span>
+                    </div>
+                </div>
+                <div class="chat-window">
+                    <h3 id="chat-username">Select a conversation</h3>
+                    <div class="dm-list"></div>
+                    <div class="dm-input">
+                        <input type="text" id="dm-text" placeholder="Type a message...">
+                        <button id="send-dm">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="profile-section" style="display: none;">
+            <div class="profile-page">
+                <div class="profile-view">
+                    <div class="profile-logo-container">
+                        <img id="profile-dp-view" src="https://via.placeholder.com/100" alt="Profile Logo">
+                        <div class="profile-info">
+                            <h2 id="username-view">YourUsername</h2>
+                            <p id="bio-view">Your bio goes here...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-update">
+                    <h3>Update Your Profile</h3>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter new username">
+                    <label for="profile-dp">Profile Logo:</label>
+                    <input type="file" id="profile-dp" accept="image/*">
+                    <label for="bio">Bio:</label>
+                    <textarea id="bio" placeholder="Tell us about yourself"></textarea>
+                    <button id="save-profile">Save Profile</button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Post-Comment Section -->
-    <section id="post-comment" class="mb-8 bg-white/95 p-6 rounded-lg">
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <h2 class="text-2xl font-semibold text-blue-600 mb-4">Create a Post</h2>
-        <button id="plus-button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+ New Post</button>
-      </div>
-    </section>
-
-    <!-- Home Section -->
-    <section id="home" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h2 class="text-2xl font-semibold text-blue-600">Forum Posts</h2>
-        <select id="sort-posts" class="p-2 border rounded mt-2 sm:mt-0">
-          <option value="newest">Sort by Newest</option>
-          <option value="most-liked">Sort by Most Liked</option>
-        </select>
-      </div>
-      <div id="posts" class="space-y-4"></div>
-    </section>
-
-    <!-- Profile Section -->
-    <section id="profile" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Your Profile</h2>
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <p><strong>Username:</strong> <span id="username-display"></span></p>
-        <p><strong>Bio:</strong> <span id="bio-display"></span></p>
-        <p><strong>Friends:</strong> <span id="friends-list"></span></p>
-        <input id="friend-username" class="w-full p-2 border rounded mb-2" placeholder="Friend's username">
-        <button id="add-friend" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Add Friend</button>
-      </div>
-    </section>
-
-    <!-- Groups Section -->
-    <section id="groups" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Groups</h2>
-      <div class="bg-blue-50 p-4 rounded-lg mb-4">
-        <input id="group-name" class="w-full p-2 border rounded" placeholder="Create a new group">
-        <button id="create-group" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Create Group</button>
-      </div>
-      <div id="groups-list" class="space-y-4"></div>
-    </section>
-
-    <!-- Chat Section -->
-    <section id="chat" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Chat</h2>
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <input id="chat-receiver" class="w-full p-2 border rounded mb-2" placeholder="Receiver's username">
-        <div id="chat-messages" class="h-64 overflow-y-auto border p-2 mb-2"></div>
-        <input id="chat-input" class="w-full p-2 border rounded" placeholder="Type a message...">
-        <button id="chat-send" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Send</button>
-      </div>
-    </section>
-
-    <!-- Events Section -->
-    <section id="events" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">College Events</h2>
-      <div class="bg-blue-50 p-4 rounded-lg mb-4">
-        <input id="event-name" class="w-full p-2 border rounded mb-2" placeholder="Event Name">
-        <input id="event-date" type="date" class="w-full p-2 border rounded mb-2">
-        <textarea id="event-desc" class="w-full p-2 border rounded" placeholder="Event Description"></textarea>
-        <button id="create-event" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Create Event</button>
-      </div>
-      <div id="events-list" class="space-y-4"></div>
-    </section>
-
-    <!-- Games Section -->
-    <section id="games" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Mini Games</h2>
-      <!-- Tic-Tac-Toe -->
-      <div class="bg-blue-50 p-4 rounded-lg mb-8">
-        <h3 class="text-lg font-semibold mb-2">Tic-Tac-Toe</h3>
-        <div id="tic-tac-toe-status" class="text-center mb-4 text-lg font-semibold text-blue-600"></div>
-        <div id="tic-tac-toe" class="grid grid-cols-3 gap-2 w-64 mx-auto"></div>
-        <div class="flex justify-center mt-4">
-          <button id="reset-tic-tac-toe" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Reset Game</button>
+    <div id="story-viewer">
+        <div id="story-progress">
+            <div id="story-progress-bar"></div>
         </div>
-      </div>
-      <!-- Snake Game -->
-      <div class="bg-blue-50 p-4 rounded-lg mb-8">
-        <h3 class="text-lg font-semibold mb-2">Snake Game</h3>
-        <div class="flex justify-between items-center mb-4">
-          <div id="snake-score" class="text-lg font-semibold text-blue-600">Score: 0</div>
-          <div id="snake-status" class="text-lg font-semibold text-blue-600"></div>
+        <img id="story-content" src="" alt="Story">
+    </div>
+    <div id="post-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Create Post</h2>
+            <textarea id="post-text" placeholder="What's on your mind?"></textarea>
+            <input type="file" id="post-image" accept="image/*">
+            <img id="post-image-preview" src="" alt="Image Preview" style="display: none; max-width: 100%; margin: 0.5rem 0;">
+            <select id="post-group" style="margin: 0.75rem 0;">
+                <option value="none">No Group</option>
+            </select>
+            <button id="submit-post">Post</button>
         </div>
-        <canvas id="snake-canvas" class="border-2 border-blue-600 mx-auto" width="400" height="400"></canvas>
-        <div class="flex space-x-4 mt-4 justify-center">
-          <button id="start-snake" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Start Game</button>
-          <button id="restart-snake" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 hidden">Restart Game</button>
+    </div>
+    <div id="story-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Add Story</h2>
+            <input type="file" id="story-image" accept="image/*">
+            <button id="submit-story">Share Story</button>
         </div>
-      </div>
-      <!-- Memory Match Game -->
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <h3 class="text-lg font-semibold mb-2">Memory Match</h3>
-        <div class="flex justify-between items-center mb-4">
-          <div id="memory-moves" class="text-lg font-semibold text-blue-600">Moves: 0</div>
-          <div id="memory-status" class="text-lg font-semibold text-blue-600"></div>
+    </div>
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Settings</h2>
+            <h3>Theme</h3>
+            <label for="theme-select">Select Theme:</label>
+            <select id="theme-select">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+            <button id="save-settings">Save</button>
         </div>
-        <div id="memory-game" class="grid grid-cols-2 sm:grid-cols-4 gap-2 w-64 mx-auto"></div>
-        <div class="flex justify-center mt-4">
-          <button id="reset-memory" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Reset Game</button>
+    </div>
+    <div id="friend-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Add Friend</h2>
+            <input type="text" id="friend-username" placeholder="Enter username">
+            <button id="submit-friend">Add Friend</button>
         </div>
-      </div>
-    </section>
-
-    <!-- Business Promotion Section -->
-    <section id="business" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Promote Your Business</h2>
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <input id="business-name" class="w-full p-2 border rounded mb-2" placeholder="Business Name">
-        <textarea id="business-desc" class="w-full p-2 border rounded mb-2" placeholder="Description"></textarea>
-        <input id="business-link" type="url" class="w-full p-2 border rounded mb-2" placeholder="Business Link">
-        <button id="promote-business" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Promote</button>
-      </div>
-      <div id="business-list" class="space-y-4"></div>
-    </section>
-
-    <!-- Settings Section -->
-    <section id="settings" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Settings</h2>
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <input id="profile-pic" type="file" class="w-full p-2 border rounded mb-2" accept="image/*">
-        <input id="profile-name" class="w-full p-2 border rounded mb-2" placeholder="Profile Name">
-        <button id="save-settings" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Save Settings</button>
-      </div>
-    </section>
-
-    <!-- DM Section -->
-    <section id="dm" class="mb-8 bg-white/95 p-6 rounded-lg hidden">
-      <h2 class="text-2xl font-semibold text-blue-600 mb-4">Direct Messages</h2>
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <input id="dm-username" class="w-full p-2 border rounded mb-2" placeholder="Recipient's username">
-        <textarea id="dm-message" class="w-full p-2 border rounded mb-2" placeholder="Your message"></textarea>
-        <button id="send-dm" class="bg-blue-600 text-white px-4 py-2 rounded mt-2 hover:bg-blue-700">Send</button>
-      </div>
-    </section>
-  </div>
-
-  <script src="/script.js"></script>
+    </div>
+    <div id="group-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Manage Groups</h2>
+            <input type="text" id="group-name" placeholder="Enter group name">
+            <button id="create-group">Create Group</button>
+            <button id="join-group">Join Group</button>
+        </div>
+    </div>
+    <div class="toast">Action successful!</div>
+    <script src="script.js"></script>
 </body>
 </html>
