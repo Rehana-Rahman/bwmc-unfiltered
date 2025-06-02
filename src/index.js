@@ -1,23 +1,18 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const collection = require('./config');
-
 const app = express();
 
-// Set view engine
-
-app.set('view engine', 'ejs'); 
+// Set view engine and views directory
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
 
 // Middleware
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // In case you also send JSON via fetch
 // Adjust for src/ folder
-
-const postsRouter = require('./routes/posts');
-app.use('/api/posts', postsRouter);
 
 // Routes
 app.get("/", (req, res) => {
@@ -85,5 +80,3 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`😎 Server running on Port: ${port}`);
 });
-
-module.exports = app;

@@ -1,11 +1,11 @@
-import { Router } from 'express';
-const router = Router();
-import { find } from '../models/Event';
+const express = require('express');
+const router = express.Router();
+const Event = require('../models/Event');
 
 // GET /api/events - Fetch all events
 router.get('/', async (req, res) => {
   try {
-    const events = await find();
+    const events = await Event.find();
     res.json(events);
   } catch (error) {
     console.error('Error fetching events:', error.message);
@@ -13,4 +13,4 @@ router.get('/', async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
