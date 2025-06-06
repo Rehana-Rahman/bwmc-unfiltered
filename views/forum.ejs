@@ -4,29 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bwmc Unfiltered</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <div class="hamburger-menu">☰</div>
+    <div class="hamburger-menu"><i class="fas fa-bars"></i></div>
     <div class="sidebar">
         <div class="logo-container">
-            <img id="logo" src="image.jpg" alt="Logo Placeholder">
+            <img id="logo" src="image.png" alt="Logo Placeholder">
             <h2>Bwmc Unfiltered</h2>
         </div>
         <nav>
             <ul>
-                <li><a href="#home" class="nav-link active">Home</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#discussions" class="nav-link">Discussions</a></li>
-                <li><a href="#friends" class="nav-link">Friends</a></li>
-                <li><a href="#groups" class="nav-link">Groups</a></li>
-                <li><button id="settings-btn" class="nav-btn">Settings</button></li>
-                <li><button id="change-profile-btn" class="nav-btn">Profile</button></li>
-                <li><button id="open-post-modal" class="nav-btn">Create Post</button></li>
-                <li><button id="open-story-modal" class="nav-btn">Add Story</button></li>
-                <li><a href="#messages" class="nav-link">Messages</a></li>
-                <li><button id="logout-btn" class="nav-btn">Logout</button></li>
+                <li><a href="#home" class="nav-link active"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="#about" class="nav-link"><i class="fas fa-info-circle"></i> About</a></li>
+                <li><a href="#discussions" class="nav-link"><i class="fas fa-comments"></i> Discussions</a></li>
+                <li><a href="#friends" class="nav-link"><i class="fas fa-users"></i> Friends</a></li>
+                <li><a href="#groups" class="nav-link"><i class="fas fa-user-friends"></i> Groups</a></li>
+                <li><a href="#games" class="nav-link"><i class="fas fa-gamepad"></i> Games</a></li>
+                <li><button id="settings-btn" class="nav-btn"><i class="fas fa-cog"></i> Settings</button></li>
+                <li><button id="change-profile-btn" class="nav-btn"><i class="fas fa-user"></i> Profile</button></li>
+                <li><button id="open-post-modal" class="nav-btn"><i class="fas fa-pen"></i> Create Post</button>
+                <li><button id="open-story-modal" class="nav-btn"><i class="fas fa-camera"></i> Add Story</button>
+                <li><a href="#messages" class="nav-link"><i class="fas fa-envelope"></i> Messages</a></li>
+                <li><button id="switch-user-btn" class="nav-btn"><i class="fas fa-user"></i> Switch User</button></li>
+                <li><button id="logout-btn" class="nav-btn"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
             </ul>
         </nav>
     </div>
@@ -36,38 +39,39 @@
                 <h1>Bwmc Unfiltered</h1>
                 <p class="tagline">Not Your Regular College Board</p>
             </header>
-            <div class="stories-container">
-                <div class="add-story-btn">
-                    <div class="add-story-icon">+</div>
-                    <p>Add Story</p>
+            <div class="home-section-container">
+                <div class="stories-container">
+                    <!-- Removed + story button -->
                 </div>
-            </div>
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="friends">Friends</button>
-                <button class="filter-btn" data-filter="groups">Groups</button>
-            </div>
-            <div class="posts">
-                <div class="post-card" data-post-id="1" data-username="User1" data-group="none">
-                    <div class="post-header">
-                        <span class="post-username">User1</span>
-                        <span class="post-tag">Campus Buzz</span>
-                    </div>
-                    <div class="post-content">Excited for the upcoming fest! 🎉</div>
-                    <div class="post-image-container"></div>
-                    <div class="post-reactions">
-                        <button class="reaction-btn like-btn" data-liked="false">❤️ <span class="like-count">0</span></button>
-                        <button class="reaction-btn dislike-btn" data-disliked="false">👎 <span class="dislike-count">0</span></button>
-                        <button class="reaction-btn comment-btn">💬 <span class="comment-count">0</span></button>
-                    </div>
-                    <div class="post-comments">
-                        <div class="comments-list"></div>
-                        <div class="comment-input">
-                            <input type="text" class="comment-text" placeholder="Add a comment...">
-                            <button class="submit-comment">Post</button>
+                <div class="stories-section">
+                </div>
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all"><i class="fas fa-globe"></i> All</button>
+                    <button class="filter-btn" data-filter="friends"><i class="fas fa-users"></i> Friends</button>
+                    <button class="filter-btn" data-filter="groups"><i class="fas fa-user-friends"></i> Groups</button>
+                </div>
+                <div class="posts">
+                    <div class="post-card" data-post-id="1" data-username="User1" data-group="none">
+                        <div class="post-header">
+                            <span class="post-username">User1</span>
+                            <span class="post-tag">Campus Buzz</span>
                         </div>
+                        <div class="post-content">Excited for the upcoming fest! 🎉</div>
+                        <div class="post-image-container"></div>
+                        <div class="post-reactions">
+                            <button class="reaction-btn like-btn" data-liked="false"><i class="fas fa-heart"></i> <span class="like-count">0</span></button>
+                            <button class="reaction-btn dislike-btn" data-disliked="false"><i class="fas fa-thumbs-down"></i> <span class="dislike-count">0</span></button>
+                            <button class="reaction-btn comment-btn"><i class="fas fa-comment"></i> <span class="comment-count">0</span></button>
+                        </div>
+                        <div class="post-comments">
+                            <div class="comments-list"></div>
+                            <div class="comment-input">
+                                <input type="text" class="comment-text" placeholder="Add a comment...">
+                                <button class="submit-comment"><i class="fas fa-paper-plane"></i> Post</button>
+                            </div>
+                        </div>
+                        <button class="follow-btn"><i class="fas fa-user-plus"></i> Follow</button>
                     </div>
-                    <button class="follow-btn">Follow</button>
                 </div>
             </div>
         </div>
@@ -83,14 +87,14 @@
                     <h2>Features</h2>
                     <ul>
                         <li>Share posts and stories with your peers</li>
-                        <li>Engage in real-time discussions</li>
+                        <li>Engage in discussions</li>
                         <li>Connect through private messages</li>
                         <li>Customize your profile and experience</li>
                         <li>Stay updated, anytime, anywhere</li>
                     </ul>
                     <h2>Contact Us</h2>
                     <p>Have questions or feedback? Reach out to us at <a href="mailto:rehanarahman004@gmail.com">rehanarahman.com</a>
-                        <a href="divyashree28123@gmail.com">divyashree.com</a>.</p>
+                        <a href="mailto:divyashree28123@gmail.com">divyashree.com</a>.</p>
                 </div>
             </div>
         </div>
@@ -98,14 +102,14 @@
             <div class="discussions-container">
                 <header>
                     <h1>Discussions</h1>
-                    <p class="tagline">Join the conversation in real-time!</p>
+                    <p class="tagline">Join the conversation!</p>
                 </header>
                 <div class="discussion-list">
                     <div class="discussion-message"></div>
                 </div>
                 <div class="discussion-input">
                     <input type="text" id="discussion-text" placeholder="Type your message...">
-                    <button id="send-discussion">Send</button>
+                    <button id="send-discussion"><i class="fas fa-paper-plane"></i> Send</button>
                 </div>
             </div>
         </div>
@@ -115,7 +119,7 @@
                     <h1>Friends</h1>
                     <p class="tagline">Connect with your college buddies!</p>
                 </header>
-                <button id="add-friend-btn" class="nav-btn">Add Friend</button>
+                <button id="add-friend-btn" class="nav-btn"><i class="fas fa-user-plus"></i> Add Friend</button>
                 <div class="friends-list"></div>
             </div>
         </div>
@@ -125,10 +129,103 @@
                     <h1>Groups</h1>
                     <p class="tagline">Join or create communities!</p>
                 </header>
-                <button id="manage-group-btn" class="nav-btn">Manage Groups</button>
+                <button id="manage-group-btn" class="nav-btn"><i class="fas fa-users-cog"></i> Manage Groups</button>
                 <div class="groups-list"></div>
             </div>
         </div>
+        <div id="games-section" style="display: none;">
+            <div class="games-container">
+                <header>
+                    <h1>Games</h1>
+                    <p class="tagline">Play fun games with your friends!</p>
+                </header>
+                <div class="games-list">
+                    <button class="game-btn" data-game="tic-tac-toe"><i class="fas fa-th"></i> Tic-Tac-Toe</button>
+                    <button class="game-btn" data-game="chess"><i class="fas fa-chess"></i> Chess</button>
+                    <button class="game-btn" data-game="checkers"><i class="fas fa-chess-board"></i> Checkers</button>
+                    <button class="game-btn" data-game="snake"><i class="fas fa-dragon"></i> Snake</button>
+                    <button class="game-btn" data-game="minesweeper"><i class="fas fa-bomb"></i> Minesweeper</button>
+                </div>
+                <div id="game-board" style="display: none;">
+                    <h3 id="game-title"></h3>
+                    <div id="tic-tac-toe-board" class="game-board-content" style="display: none;">
+                        <div class="tic-tac-toe-row">
+                            <button class="tic-tac-toe-cell" data-index="0"></button>
+                            <button class="tic-tac-toe-cell" data-index="1"></button>
+                            <button class="tic-tac-toe-cell" data-index="2"></button>
+                        </div>
+                        <div class="tic-tac-toe-row">
+                            <button class="tic-tac-toe-cell" data-index="3"></button>
+                            <button class="tic-tac-toe-cell" data-index="4"></button>
+                            <button class="tic-tac-toe-cell" data-index="5"></button>
+                        </div>
+                        <div class="tic-tac-toe-row">
+                            <button class="tic-tac-toe-cell" data-index="6"></button>
+                            <button class="tic-tac-toe-cell" data-index="7"></button>
+                            <button class="tic-tac-toe-cell" data-index="8"></button>
+                        </div>
+                        <button id="reset-tic-tac-toe"><i class="fas fa-redo"></i> Reset Game</button>
+                    </div>
+                    <div id="game-message"></div>
+                </div>
+            </div>
+        </div>
+        <div id="games-section" style="display: none;">
+    <div class="games-container">
+        <header>
+            <h1>Games</h1>
+            <p class="tagline">Play fun games with your friends!</p>
+        </header>
+        <div class="games-list">
+            <button class="game-btn" data-game="tic-tac-toe"><i class="fas fa-th"></i> Tic-Tac-Toe</button>
+            <button class="game-btn" data-game="chess"><i class="fas fa-chess"></i> Chess</button>
+            <button class="game-btn" data-game="checkers"><i class="fas fa-chess-board"></i> Checkers</button>
+            <button class="game-btn" data-game="snake"><i class="fas fa-dragon"></i> Snake</button>
+            <button class="game-btn" data-game="minesweeper"><i class="fas fa-bomb"></i> Minesweeper</button>
+        </div>
+        <div id="game-board" style="display: none;">
+            <h3 id="game-title"></h3>
+            <div id="tic-tac-toe-board" class="game-board-content" style="display: none;">
+                <div class="tic-tac-toe-row">
+                    <button class="tic-tac-toe-cell" data-index="0"></button>
+                    <button class="tic-tac-toe-cell" data-index="1"></button>
+                    <button class="tic-tac-toe-cell" data-index="2"></button>
+                </div>
+                <div class="tic-tac-toe-row">
+                    <button class="tic-tac-toe-cell" data-index="3"></button>
+                    <button class="tic-tac-toe-cell" data-index="4"></button>
+                    <button class="tic-tac-toe-cell" data-index="5"></button>
+                </div>
+                <div class="tic-tac-toe-row">
+                    <button class="tic-tac-toe-cell" data-index="6"></button>
+                    <button class="tic-tac-toe-cell" data-index="7"></button>
+                    <button class="tic-tac-toe-cell" data-index="8"></button>
+                </div>
+            </div>
+            <canvas id="chess-board" width="400" height="400" style="display: none;"></canvas>
+            <canvas id="checkers-board" width="400" height="400" style="display: none;"></canvas>
+            <canvas id="snake-board" width="400" height="400" style="display: none;"></canvas>
+            <div id="game-message"></div>
+            <button id="reset-tic-tac-toe"><i class="fas fa-redo"></i> Reset Tic-Tac-Toe</button>
+            <button id="reset-chess"><i class="fas fa-redo"></i> Reset Chess</button>
+            <button id="reset-checkers"><i class="fas fa-redo"></i> Reset Checkers</button>
+            <button id="reset-snake"><i class="fas fa-redo"></i> Reset Snake</button>
+        </div>
+    </div>
+</div>
+<script src="tic-tac-toe.js"></script> <!-- Your existing Tic-Tac-Toe script -->
+<script src="games.js"></script>
+        <div id="friends-section" style="display: none;">
+            <div class="friends-container">
+                <header>
+                    <h1>Friends</h1>
+                    <p class="tagline">Connect with your college buddies!</p>
+                </header>
+                <button id="add-friend-btn" class="nav-btn"><i class="fas fa-user-plus"></i> Add Friend</button>
+                <div class="friends-list"></div>
+            </div>
+    
+</div>
         <div id="messages-section" style="display: none;">
             <div class="messages-container">
                 <div class="conversation-list">
@@ -147,7 +244,7 @@
                     <div class="dm-list"></div>
                     <div class="dm-input">
                         <input type="text" id="dm-text" placeholder="Type a message...">
-                        <button id="send-dm">Send</button>
+                        <button id="send-dm"><i class="fas fa-paper-plane"></i> Send</button>
                     </div>
                 </div>
             </div>
@@ -171,7 +268,7 @@
                     <input type="file" id="profile-dp" accept="image/*">
                     <label for="bio">Bio:</label>
                     <textarea id="bio" placeholder="Tell us about yourself"></textarea>
-                    <button id="save-profile">Save Profile</button>
+                    <button id="save-profile"><i class="fas fa-save"></i> Save Profile</button>
                 </div>
             </div>
         </div>
@@ -192,7 +289,7 @@
             <select id="post-group" style="margin: 0.75rem 0;">
                 <option value="none">No Group</option>
             </select>
-            <button id="submit-post">Post</button>
+            <button id="submit-post"><i class="fas fa-paper-plane"></i> Post</button>
         </div>
     </div>
     <div id="story-modal" class="modal">
@@ -200,7 +297,7 @@
             <span class="close">×</span>
             <h2>Add Story</h2>
             <input type="file" id="story-image" accept="image/*">
-            <button id="submit-story">Share Story</button>
+            <button id="submit-story"><i class="fas fa-camera"></i> Share Story</button>
         </div>
     </div>
     <div id="settings-modal" class="modal">
@@ -213,7 +310,7 @@
                 <option value="light">Light</option>
                 <option value="dark">Dark</option>
             </select>
-            <button id="save-settings">Save</button>
+            <button id="save-settings"><i class="fas fa-save"></i> Save</button>
         </div>
     </div>
     <div id="friend-modal" class="modal">
@@ -221,7 +318,7 @@
             <span class="close">×</span>
             <h2>Add Friend</h2>
             <input type="text" id="friend-username" placeholder="Enter username">
-            <button id="submit-friend">Add Friend</button>
+            <button id="submit-friend"><i class="fas fa-user-plus"></i> Add Friend</button>
         </div>
     </div>
     <div id="group-modal" class="modal">
@@ -229,10 +326,19 @@
             <span class="close">×</span>
             <h2>Manage Groups</h2>
             <input type="text" id="group-name" placeholder="Enter group name">
-            <button id="create-group">Create Group</button>
-            <button id="join-group">Join Group</button>
+            <button id="create-group"><i class="fas fa-users"></i> Create Group</button>
+            <button id="join-group"><i class="fas fa-user-friends"></i> Join Group</button>
         </div>
     </div>
+    <div id="switch-user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Switch User</h2>
+            <input type="text" id="switch-username" placeholder="Enter username">
+            <button id="submit-switch-user"><i class="fas fa-user"></i> Switch</button>
+        </div>
+    </div>
+    
     <div class="toast">Action successful!</div>
     <script src="script.js"></script>
 </body>

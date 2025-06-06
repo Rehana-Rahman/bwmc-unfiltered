@@ -24,5 +24,6 @@ app.use('/api/posts', require('./routes/posts'));
 app.use('/api/profiles', require('./routes/profiles'));
 app.use('/api/discussions', require('./routes/discussions'));
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/friends', require('./routes/friends'));
 
 app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

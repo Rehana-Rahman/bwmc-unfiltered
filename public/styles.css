@@ -73,6 +73,12 @@ body.dark-mode {
     box-shadow: 2px 0 10px rgba(59, 130, 246, 0.3);
     transition: transform 0.3s ease;
     overflow-y: auto;
+    transform: translateX(-100%); /* Sidebar hidden by default */
+    z-index: 1000; /* Ensure sidebar is above main content */
+}
+
+.sidebar.active {
+    transform: translateX(0); /* Sidebar visible when active */
 }
 
 body.dark-mode .sidebar {
@@ -118,6 +124,8 @@ body.dark-mode .sidebar {
     cursor: pointer;
     text-align: left;
     width: 100%;
+    position: relative;
+    z-index: 1; /* Ensure nav elements are clickable */
 }
 
 .nav-link:hover, .nav-link.active, .nav-btn:hover {
@@ -129,10 +137,28 @@ body.dark-mode .sidebar {
     margin-right: 0.5rem;
 }
 
+.hamburger-menu {
+    position: relative;
+    z-index: 1001; /* Ensure hamburger menu is clickable and above sidebar */
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #1e3a8a;
+}
+
+body.dark-mode .hamburger-menu {
+    color: #f5f8ff;
+}
+
 .main-content {
-    margin-left: 250px;
+    margin-left: 0; /* Default margin when sidebar is hidden */
     flex: 1;
     padding: 1rem;
+    transition: margin-left 0.3s ease; /* Smooth transition for margin change */
+}
+
+.sidebar.active ~ .main-content {
+    margin-left: 250px; /* Shift main content to the right when sidebar is active */
 }
 
 header {
@@ -141,17 +167,19 @@ header {
     position: relative;
     background: linear-gradient(45deg, #3b82f6, #60a5fa);
     box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    overflow: hidden; /* Clip pseudo-element to header bounds */
 }
 
 header::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    top: 0;
+    left: 0;
+    width: 100%; /* Match header size */
+    height: 100%;
     background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent);
     animation: pulse 8s infinite;
+    z-index: -1; /* Place behind header content */
 }
 
 @keyframes pulse {
@@ -194,6 +222,7 @@ button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    z-index: 1; /* Ensure buttons are clickable */
 }
 
 button::after {
@@ -227,7 +256,7 @@ button:disabled {
     cursor: not-allowed;
 }
 
-#submit-post, #submit-story, #save-settings, #send-dm, #send-discussion, #submit-friend, #create-group, #join-group, #logout-btn, #save-profile {
+#submit-post, #submit-story, #save-settings, #send-dm, #send-discussion, #submit-friend, #create-group, #join-group, #logout-btn, #save-profile, #reset-tic-tac-toe {
     background: #2563eb;
 }
 
@@ -347,6 +376,8 @@ button:disabled {
     position: relative;
     animation: slideIn 0.4s ease;
     box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+    max-height: 80vh; /* Added */
+    overflow-y: auto; /* Added */
 }
 
 body.dark-mode .modal-content {
@@ -532,7 +563,7 @@ body.dark-mode .follow-btn.following {
     color: #f5f8ff;
 }
 
-.dm-list, .discussion-list, .friends-list, .groups-list {
+.dm-list, .discussion-list, .friends-list, .groups-list, .games-list {
     max-height: 400px;
     overflow-y: auto;
     margin-bottom: 1.5rem;
@@ -541,7 +572,7 @@ body.dark-mode .follow-btn.following {
     padding: 1rem;
 }
 
-body.dark-mode .dm-list, body.dark-mode .discussion-list, body.dark-mode .friends-list, body.dark-mode .groups-list {
+body.dark-mode .dm-list, body.dark-mode .discussion-list, body.dark-mode .friends-list, body.dark-mode .groups-list, body.dark-mode .games-list {
     background: linear-gradient(135deg, #1e3a8a, #000000);
 }
 
@@ -639,30 +670,30 @@ body.dark-mode .friend-item, body.dark-mode .group-item {
     margin-top: 0.5rem;
 }
 
-.about-container, .friends-container, .groups-container, .discussions-container {
+.about-container, .friends-container, .groups-container, .discussions-container, .games-container {
     padding: 2rem;
     max-width: 800px;
     margin: 0 auto;
 }
 
-.about-content, .friends-list, .groups-list, .discussion-list {
+.about-content, .friends-list, .groups-list, .discussion-list, .games-list {
     background: #ffffff;
     padding: 1.5rem;
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
 }
 
-body.dark-mode .about-content, body.dark-mode .friends-list, body.dark-mode .groups-list, body.dark-mode .discussion-list {
+body.dark-mode .about-content, body.dark-mode .friends-list, body.dark-mode .groups-list, body.dark-mode .discussion-list, body.dark-mode .games-list {
     background: #1e3a8a;
     color: #f5f8ff;
 }
 
-.about-content h2, .friends-container h2, .groups-container h2 {
+.about-content h2, .friends-container h2, .groups-container h2, .discussions-container h2, .games-container h2 {
     margin: 1rem 0 0.5rem;
     color: #3b82f6;
 }
 
-body.dark-mode .about-content h2, body.dark-mode .friends-container h2, body.dark-mode .groups-container h2 {
+body.dark-mode .about-content h2, body.dark-mode .friends-container h2, body.dark-mode .groups-container h2, body.dark-mode .discussions-container h2, body.dark-mode .games-container h2 {
     color: #60a5fa;
 }
 
@@ -735,14 +766,112 @@ body.dark-mode .profile-info p {
     color: #bfdbfe;
 }
 
+/* Games Section Styles */
+.games-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.games-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.game-btn {
+    background: #dbeafe;
+    color: #1e3a8a;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .game-btn {
+    background: #1e3a8a;
+    color: #f5f8ff;
+}
+
+.game-btn:hover {
+    background: #2563eb;
+    color: #ffffff;
+    transform: scale(1.15);
+}
+
+#game-board {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+#game-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #3b82f6;
+}
+
+body.dark-mode #game-title {
+    color: #60a5fa;
+}
+
+#game-message {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: #1e3a8a;
+}
+
+body.dark-mode #game-message {
+    color: #f5f8ff;
+}
+
+.tic-tac-toe-row {
+    display: flex;
+    justify-content: center;
+}
+
+.tic-tac-toe-cell {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+    background: #ffffff;
+    color: #1e3a8a;
+    border: 2px solid #3b82f6;
+    border-radius: 10px;
+    margin: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.dark-mode .tic-tac-toe-cell {
+    background: #1e3a8a;
+    color: #f5f8ff;
+}
+
+.tic-tac-toe-cell:hover {
+    background: #dbeafe;
+}
+
+body.dark-mode .tic-tac-toe-cell:hover {
+    background: #2563eb;
+}
+
+.tic-tac-toe-cell:disabled {
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+/* Media Queries */
 @media (max-width: 768px) {
     .sidebar {
         width: 200px;
         padding: 1.5rem 1rem;
     }
 
-    .main-content {
-        margin-left: 200px;
+    .sidebar.active ~ .main-content {
+        margin-left: 200px; /* Adjust margin for smaller sidebar */
     }
 
     .posts {
@@ -785,6 +914,93 @@ body.dark-mode .profile-info p {
     .profile-info h2 {
         font-size: 1.5rem;
     }
+
+    .tic-tac-toe-cell {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    canvas {
+    border: 2px solid #3b82f6;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode canvas {
+    background: #1e3a8a;
+    border-color: #60a5fa;
+}
+
+#minesweeper-board {
+    display: inline-grid;
+    grid-template-columns: repeat(9, 30px);
+    gap: 1px;
+    background: #dbeafe;
+    border: 2px solid #3b82f6;
+    border-radius: 10px;
+    padding: 5px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode #minesweeper-board {
+    background: #1e3a8a;
+    border-color: #60a5fa;
+}
+
+.minesweeper-cell {
+    width: 30px;
+    height: 30px;
+    background: #eee;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.minesweeper-cell.revealed {
+    background: #ccc;
+    cursor: default;
+}
+
+.minesweeper-cell.mine {
+    background: #ff3333;
+}
+
+.minesweeper-cell.flagged {
+    background: #60a5fa;
+    color: #ffffff;
+}
+
+body.dark-mode .minesweeper-cell {
+    background: #444;
+    border-color: #555;
+    color: #f5f8ff;
+}
+
+body.dark-mode .minesweeper-cell.revealed {
+    background: #333;
+}
+
+body.dark-mode .minesweeper-cell.mine {
+    background: #cc0000;
+}
+
+body.dark-mode .minesweeper-cell.flagged {
+    background: #2563eb;
+}
+
+#reset-chess, #reset-checkers, #reset-snake, #reset-minesweeper {
+    background: #2563eb;
+    margin-top: 1rem;
+}
+
+#reset-chess i, #reset-checkers i, #reset-snake i, #reset-minesweeper i {
+    margin-right: 0.3rem;
+}
 }
 
 @media (max-width: 600px) {
@@ -793,6 +1009,10 @@ body.dark-mode .profile-info p {
         height: auto;
         position: relative;
         padding: 1rem;
+    }
+
+    .sidebar.active ~ .main-content {
+        margin-left: 0; /* No margin shift on small screens */
     }
 
     .main-content {
@@ -812,4 +1032,215 @@ body.dark-mode .profile-info p {
         width: 60px;
         height: 60px;
     }
+
+    .tic-tac-toe-cell {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}
+
+#switch-user-modal .modal-content {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#switch-user-modal input {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+#switch-user-modal button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+#switch-user-modal button:hover {
+    background-color: #0056b3;
+}
+
+#switch-user-modal .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Dark mode adjustments */
+body.dark-mode #switch-user-modal .modal-content {
+    background-color: #333;
+    color: #fff;
+}
+
+body.dark-mode #switch-user-modal input {
+    background-color: #444;
+    color: #fff;
+    border-color: #555;
+}
+
+body.dark-mode #switch-user-modal button {
+    background-color: #1a73e8;
+}
+
+body.dark-mode #switch-user-modal button:hover {
+    background-color: #1557b0;
+}
+
+.nav-link i, .nav-btn i {
+    margin-right: 0.5rem;
+    width: 20px;
+    text-align: center;
+}
+
+.hamburger-menu i {
+    font-size: 1.5rem;
+}
+
+/* Icon styling for filter buttons */
+.filter-btn i {
+    margin-right: 0.5rem;
+}
+
+/* Icon styling for post reactions and comments */
+.reaction-btn i {
+    margin-right: 0.3rem;
+}
+
+.submit-comment i {
+    margin-right: 0.3rem;
+}
+
+.follow-btn i {
+    margin-right: 0.3rem;
+}
+
+/* Icon styling for games */
+.game-btn i {
+    margin-right: 0.5rem;
+}
+
+#reset-tic-tac-toe i {
+    margin-right: 0.3rem;
+}
+
+/* Icon styling for modals */
+#submit-post i, #submit-story i, #save-settings i, #submit-friend i, #create-group i, #join-group i, #submit-switch-user i, #save-profile i {
+    margin-right: 0.3rem;
+}
+
+/* Icon styling for discussion and DM inputs */
+#send-discussion i, #send-dm i {
+    margin-right: 0.3rem;
+}
+
+/* Ensure modal styles are consistent with existing modals (unchanged from previous) */
+#switch-user-modal .modal-content {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#switch-user-modal input {
+    width: 100%;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+#switch-user-modal button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+#switch-user-modal button:hover {
+    background-color: #0056b3;
+}
+
+#switch-user-modal .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+/* Dark mode adjustments */
+body.dark-mode #switch-user-modal .modal-content {
+    background-color: #333;
+    color: #fff;
+}
+
+body.dark-mode #switch-user-modal input {
+    background-color: #444;
+    color: #fff;
+    border-color: #555;
+}
+
+body.dark-mode #switch-user-modal button {
+    background-color: #1a73e8;
+}
+
+body.dark-mode #switch-user-modal button:hover {
+    background-color: #1557b0;
+}
+
+/* Story container styling (ensure no add-story-btn) */
+.stories-container {
+    display: flex;
+    overflow-x: auto;
+    padding: 0.5rem;
+}
+
+.story {
+    margin-right: 1rem;
+    text-align: center;
+}
+
+.story img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #007bff;
+}
+
+.story p {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+}
+
+#post-image-preview {
+    display: none;
+    max-width: 100%;
+    margin: 0.5rem 0;
+    max-height: 300px; /* Added */
+    object-fit: contain; /* Added */
 }
